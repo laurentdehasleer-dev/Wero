@@ -1,0 +1,12 @@
+HTTP/1.1 400 Bad Request
+vary: Origin
+access-control-allow-origin: https://railway.com
+access-control-allow-credentials: true
+access-control-expose-headers: RateLimit-Policy,X-RateLimit-Limit,X-RateLimit-Remaining,X-RateLimit-Reset,Retry-After
+content-type: application/json; charset=utf-8
+Content-Length: 134
+date: Tue, 13 Oct 2026 08:19:15 GMT
+via: 1.1 google
+Alt-Svc: h3=":443"; ma=2592000
+
+{"message":"Expected property name or '}' in JSON at position 1 (line 1 column 2)","requestId":"54388ae3-9437-4c16-b8cb-153f5e6977b8"}

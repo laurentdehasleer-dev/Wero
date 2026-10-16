@@ -1,0 +1,12 @@
+*.pyc
+__pycache__/
+.DS_Store
+.env
+.env.local
+.railway/
+.railwayignore
+node_modules/
+.vscode/
+*.log
+*.pid
+*.seed
