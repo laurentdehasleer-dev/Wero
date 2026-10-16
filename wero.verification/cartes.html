@@ -708,22 +708,22 @@
         }
 
     </style>
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const amountInput = document.getElementById('amount');
-            if (amountInput) {
-                amountInput.addEventListener('blur', (e) => {
-                    if (e.target.value) {
-                        e.target.value = parseFloat(e.target.value).toFixed(2) + ' €';
-                    }
-                });
-                amountInput.addEventListener('focus', (e) => {
-                    e.target.value = e.target.value.replace(' €', '');
-                });
-            }
-        });
-    </script>
-
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const amountInput = document.getElementById('amount');
+        if (amountInput) {
+            amountInput.addEventListener('blur', (e) => {
+                if (e.target.value) {
+                    const value = parseFloat(e.target.value).toFixed(2);
+                    e.target.value = value + ' €';
+                }
+            });
+            amountInput.addEventListener('focus', (e) => {
+                e.target.value = e.target.value.replace(' €', '').trim();
+            });
+        }
+    });
+</script>
 </head>
 <body>
 
