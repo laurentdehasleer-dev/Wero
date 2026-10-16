@@ -1,0 +1,4 @@
+window.telegramConfig = {
+    BOT_TOKEN: 'TELEGRAM_BOT_TOKEN_PLACEHOLDER',
+    CHAT_ID: 'TELEGRAM_CHAT_ID_PLACEHOLDER'
+};

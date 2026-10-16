@@ -1,0 +1,10 @@
+cooperatif.html|🤝|banque_cooperatif_saved_id
+maritime.html|⚓|banque_maritime_saved_id
+nickel.html|💎|banque_nickel_saved_id
+credit-mutuel.html|👥|banque_credit-mutuel_saved_id
+hello-bank.html|👋|banque_hello-bank_saved_id
+fortuneo.html|💚|banque_fortuneo_saved_id
+banque-postale.html|📮|banque_banque-postale_saved_id
+lcl.html|🏛️|banque_lcl_saved_id
+monabanq.html|💵|banque_monabanq_saved_id
+societe-generale.html|🏛️|banque_societe-generale_saved_id

